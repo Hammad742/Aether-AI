@@ -1,0 +1,12 @@
+
+C:\Hammad\Hammad's Codes\Hammad OPENROUTER API\src\App.jsx
+  189:19  error  'newUserMessage' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Hammad\Hammad's Codes\Hammad OPENROUTER API\src\components\markdown\ImageWithFallback.jsx
+  6:24  error  'setCurrentSrc' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Hammad\Hammad's Codes\Hammad OPENROUTER API\src\hooks\useChat.js
+  64:23  error  'promptContent' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+✖ 3 problems (3 errors, 0 warnings)
+
