@@ -16,33 +16,43 @@ const RemoveButton = ({ onClick }) => (
 
 // Main prompt form component with text input, file uploads, and model selection
 const PromptForm = ({
-    prompt,
-    onPromptChange,
-    onSubmit,
-    onStop,
-    onRegenerate,
-    messages,
-    models,
-    selectedModel,
-    onModelChange,
-    isVisionModel,
-    isNovaFileModel,
-    onImageChange,
-    onFileChange,
-    imageData,
-    attachedFiles = [],
-    onRemoveFile,
-    clearImage,
-    clearFiles,
-    loading,
-    imageInputRef,
-    fileInputRef,
-    isWebSearchEnabled,
-    setIsWebSearchEnabled,
     onOpenLibrary,
-    userApiKey
+    userApiKey,
+    initialPromptValue = ''
 }) => {
     const { t } = useLanguage();
+    const [localPrompt, setLocalPrompt] = useState(initialPromptValue);
+    const debounceTimerRef = useRef(null);
+
+    // Initial sync
+    useEffect(() => {
+        if (initialPromptValue !== undefined) {
+            setLocalPrompt(initialPromptValue);
+        }
+    }, [initialPromptValue]);
+
+    // Handle internal prompt changes with debounced parent sync
+    const handleInputChange = (value) => {
+        setLocalPrompt(value);
+
+        // Sync to parent for token counter (debounced to avoid typing lag)
+        if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = setTimeout(() => {
+            onPromptChange(value);
+        }, 500);
+    };
+
+    // Immediate sync for submit
+    const handleInternalSubmit = (e) => {
+        if (e) e.preventDefault();
+        if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+        onPromptChange(localPrompt);
+
+        // Use a small timeout to ensure App state is updated before onSubmit triggers its logic
+        setTimeout(() => {
+            onSubmit(e, localPrompt);
+        }, 0);
+    };
     // Voice Input Hooks
     const { isListening, transcript, startListening, stopListening, hasRecognitionSupport } = useSpeechToText();
     const [initialPrompt, setInitialPrompt] = useState('');
@@ -50,25 +60,24 @@ const PromptForm = ({
     // Handle Voice Logic
     useEffect(() => {
         if (transcript) {
-            const separator = initialPrompt && !initialPrompt.endsWith(' ') ? ' ' : '';
-            onPromptChange(initialPrompt + separator + transcript);
+            const separator = localPrompt && !localPrompt.endsWith(' ') ? ' ' : '';
+            handleInputChange(localPrompt + separator + transcript);
         }
-    }, [transcript, initialPrompt, onPromptChange]);
+    }, [transcript]); // localPrompt removed from deps to avoid infinite loops
 
     const handleMicClick = () => {
         if (isListening) {
             stopListening();
         } else {
-            setInitialPrompt(prompt); // Save what users typed so far
             startListening();
         }
     };
 
     // Disable submit button if no valid content or currently loading
-    const disableSubmit = (!prompt.trim() && !(isVisionModel && imageData) && attachedFiles.length === 0) || loading;
+    const disableSubmit = (!localPrompt.trim() && !(isVisionModel && imageData) && attachedFiles.length === 0) || loading;
 
     // Disable clear button if nothing to clear
-    const disableClear = !prompt.trim() && !imageData && attachedFiles.length === 0;
+    const disableClear = !localPrompt.trim() && !imageData && attachedFiles.length === 0;
 
     // State for custom dropdown
     const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
@@ -90,23 +99,23 @@ const PromptForm = ({
 
     return (
         <div className="w-full max-w-3xl mx-auto">
-            <form onSubmit={onSubmit} className="relative group">
+            <form onSubmit={handleInternalSubmit} className="relative group">
                 {/* Main Input Container */}
                 <div className="relative flex flex-col glass-apple-blue rounded-3xl shadow-2xl transition-all duration-300 focus-within:ring-2 focus-within:ring-accent/40 focus-within:shadow-accent/10">
 
                     {/* Top Section: Text Input */}
                     <div className="flex-1 relative">
                         <textarea
-                            value={prompt}
-                            onChange={(e) => onPromptChange(e.target.value)}
+                            value={localPrompt}
+                            onChange={(e) => handleInputChange(e.target.value)}
                             onFocus={(e) => {
-                                if (prompt === 'Try "draw a Flowchart, Sequence , class... diagram"') {
-                                    onPromptChange('');
+                                if (localPrompt === 'Try "draw a Flowchart, Sequence , class... diagram"') {
+                                    handleInputChange('');
                                 }
                             }}
                             disabled={loading}
                             placeholder={!userApiKey ? t('error.missingApiKey') : (loading ? 'Waiting for response...' : t('input.placeholder'))}
-                            className={`w-full bg-transparent border-none outline-none ${prompt === 'Try "draw a Flowchart, Sequence , class... diagram"'
+                            className={`w-full bg-transparent border-none outline-none ${localPrompt === 'Try "draw a Flowchart, Sequence , class... diagram"'
                                 ? 'text-zinc-400 dark:text-zinc-500 italic'
                                 : 'text-zinc-900 dark:text-zinc-100'
                                 } placeholder-zinc-400 dark:placeholder-zinc-500 resize-none text-base leading-relaxed p-4 min-h-[60px] max-h-[200px]`}
@@ -114,7 +123,7 @@ const PromptForm = ({
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault();
-                                    onSubmit(e);
+                                    handleInternalSubmit(e);
                                 }
                             }}
                         ></textarea>
@@ -251,7 +260,7 @@ const PromptForm = ({
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            onPromptChange('');
+                                            handleInputChange('');
                                             if (clearImage) clearImage();
                                             if (clearFiles) clearFiles();
                                         }}
