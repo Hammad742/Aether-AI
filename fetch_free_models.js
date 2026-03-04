@@ -1,5 +1,5 @@
 /* global process */
-const API_KEY = process.env.VITE_OPENROUTER_API_KEY || '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';
+const API_KEY = process.env.VITE_OPENROUTER_API_KEY;
 
 async function fetchFreeModels() {
     try {
