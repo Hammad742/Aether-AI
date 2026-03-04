@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { FaPlus, FaComments, FaTrash, FaFolderPlus, FaFolder, FaFolderOpen, FaCheck, FaTimes, FaCog, FaChevronLeft, FaSearch, FaDownload, FaImage, FaMicrophone, FaBrain, FaFileAlt } from 'react-icons/fa';
 import { exportToJSON as exportChat } from '../utils/exportUtils';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -29,6 +29,42 @@ const Sidebar = ({
     const [deletingFolderId, setDeletingFolderId] = useState(null);
     const [isCreatingFolder, setIsCreatingFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
+
+    // Touch gesture state for swipe-to-close
+    const touchStartRef = useRef({ x: 0, deltaX: 0 });
+    const asideRef = useRef(null);
+
+    const handleTouchStart = (e) => {
+        if (!isOpen || window.innerWidth >= 768) return;
+        touchStartRef.current = { x: e.touches[0].clientX, deltaX: 0 };
+        if (asideRef.current) {
+            asideRef.current.style.transition = 'none';
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (!isOpen || window.innerWidth >= 768) return;
+        const currentX = e.touches[0].clientX;
+        const deltaX = Math.min(0, currentX - touchStartRef.current.x);
+        touchStartRef.current.deltaX = deltaX;
+
+        if (asideRef.current) {
+            // Use translate3d for GPU acceleration (90FPS target)
+            asideRef.current.style.transform = `translate3d(${deltaX}px, 0, 0)`;
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (!isOpen || window.innerWidth >= 768) return;
+        if (asideRef.current) {
+            asideRef.current.style.transition = '';
+            asideRef.current.style.transform = '';
+        }
+
+        if (touchStartRef.current.deltaX < -80) {
+            toggleSidebar();
+        }
+    };
 
     const filteredSessions = useMemo(() => {
         return sessions.filter(session =>
@@ -134,7 +170,18 @@ const Sidebar = ({
             )}
 
             {/* Sidebar Container */}
-            <aside className={`fixed inset-y-0 left-0 z-[70] w-72 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-2xl border-r border-zinc-200 dark:border-zinc-800/50 transform transition-all duration-300 ease-in-out ${isOpen ? 'translate-x-0 md:ml-0' : '-translate-x-full md:-ml-72'} md:relative flex flex-col h-full`}>
+            <aside
+                ref={asideRef}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                className={`fixed inset-y-0 left-0 z-[70] w-72 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-2xl border-r border-zinc-200 dark:border-zinc-800/50 transform transition-all duration-300 ease-in-out ${isOpen ? 'translate-x-0 md:ml-0' : '-translate-x-full md:-ml-72'} md:relative flex flex-col h-full`}
+                style={{
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    perspective: '1000px'
+                }}
+            >
                 <div className="flex flex-col h-full p-4 overflow-hidden">
                     {/* Header: New Chat & Toggle */}
                     <div className="flex items-center gap-2 mb-2">

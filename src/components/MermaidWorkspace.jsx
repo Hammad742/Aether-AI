@@ -249,12 +249,14 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
     // Performance refs to bypass React re-renders during interaction
     const panRef = useRef({ x: 0, y: 0 });
     const zoomRef = useRef(1);
+    const touchStartRef = useRef({ x: 0, y: 0, dist: 0 });
 
     const iframeRef = useRef(null);
     const containerRef = useRef(null);
     const resizableRef = useRef(null);
     const leftPanelRef = useRef(null);
     const renderAreaRef = useRef(null);
+    const zoomIndicatorRef = useRef(null);
 
     // Keep refs in sync with state for UI consistency (e.g. initial load, reset)
     useEffect(() => {
@@ -273,13 +275,6 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
     useEffect(() => {
         const handleMouseMove = (e) => {
 
-            if (isResizingVertical && leftPanelRef.current) {
-                const rect = leftPanelRef.current.getBoundingClientRect();
-                const relativeY = e.clientY - rect.top;
-                const percentage = 100 - (relativeY / rect.height) * 100;
-                // Clamp between 10% and 85%
-                setTemplatesHeight(Math.max(10, Math.min(85, percentage)));
-            }
             if (isPanning) {
                 const newPan = {
                     x: panRef.current.x + e.movementX,
@@ -287,12 +282,20 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
                 };
                 panRef.current = newPan;
 
-                // Direct message to iframe (bypasses state updates for zero-lag)
-                iframeRef.current?.contentWindow?.postMessage({
-                    type: 'updateTransform',
-                    pan: newPan,
-                    zoom: zoomRef.current
-                }, '*');
+                // DIRECT DOM UPDATE - 90FPS GOAL
+                if (iframeRef.current) {
+                    iframeRef.current.style.transform = `translate3d(${newPan.x}px, ${newPan.y}px, 0) scale(${zoomRef.current})`;
+                }
+
+                if (!window.zoomSyncPending) {
+                    window.zoomSyncPending = true;
+                    requestAnimationFrame(() => {
+                        if (zoomIndicatorRef.current) {
+                            zoomIndicatorRef.current.innerText = `${Math.round(zoomRef.current * 100)}%`;
+                        }
+                        window.zoomSyncPending = false;
+                    });
+                }
             }
         };
 
@@ -306,7 +309,7 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
         };
 
         if (isResizingVertical || isPanning) {
-            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mousemove', handleMouseMove, { passive: isPanning });
             window.addEventListener('mouseup', handleMouseUp);
             if (isResizingVertical) document.body.style.cursor = 'row-resize';
             else if (isPanning) document.body.style.cursor = 'grabbing';
@@ -320,6 +323,96 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
             document.body.style.userSelect = '';
         };
     }, [isResizingVertical, isPanning]);
+
+    // Touch Interaction Logic
+    const getTouchDist = (touches) => {
+        return Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+    };
+
+    const handleTouchStart = (e) => {
+        setIsPanning(true);
+        if (e.touches.length === 2) {
+            touchStartRef.current = {
+                dist: getTouchDist(e.touches),
+                x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+            };
+        } else if (e.touches.length === 1) {
+            touchStartRef.current = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY
+            };
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (!isPanning) return;
+        e.preventDefault();
+
+        if (e.touches.length === 2) {
+            // Pinch to Zoom
+            const newDist = getTouchDist(e.touches);
+            const distDelta = newDist / touchStartRef.current.dist;
+            const newZoom = Math.max(0.05, Math.min(7, zoomRef.current * distDelta));
+
+            if (newZoom !== zoomRef.current && renderAreaRef.current) {
+                const rect = renderAreaRef.current.getBoundingClientRect();
+                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+
+                const worldX = (centerX - panRef.current.x) / zoomRef.current;
+                const worldY = (centerY - panRef.current.y) / zoomRef.current;
+
+                const newPan = {
+                    x: centerX - worldX * newZoom,
+                    y: centerY - worldY * newZoom
+                };
+
+                panRef.current = newPan;
+                zoomRef.current = newZoom;
+                touchStartRef.current.dist = newDist;
+
+                // DIRECT DOM UPDATE - 90FPS GOAL
+                if (iframeRef.current) {
+                    iframeRef.current.style.transform = `translate3d(${newPan.x}px, ${newPan.y}px, 0) scale(${newZoom})`;
+                }
+
+                if (!window.zoomSyncPending) {
+                    window.zoomSyncPending = true;
+                    requestAnimationFrame(() => {
+                        if (zoomIndicatorRef.current) {
+                            zoomIndicatorRef.current.innerText = `${Math.round(zoomRef.current * 100)}%`;
+                        }
+                        window.zoomSyncPending = false;
+                    });
+                }
+            }
+        } else if (e.touches.length === 1) {
+            // Panning
+            const dx = e.touches[0].clientX - touchStartRef.current.x;
+            const dy = e.touches[0].clientY - touchStartRef.current.y;
+
+            const newPan = {
+                x: panRef.current.x + dx,
+                y: panRef.current.y + dy
+            };
+
+            panRef.current = newPan;
+            touchStartRef.current.x = e.touches[0].clientX;
+            touchStartRef.current.y = e.touches[0].clientY;
+
+            // DIRECT DOM UPDATE - 90FPS GOAL
+            if (iframeRef.current) {
+                iframeRef.current.style.transform = `translate3d(${newPan.x}px, ${newPan.y}px, 0) scale(${zoomRef.current})`;
+            }
+        }
+    };
+
+    const handleTouchEnd = () => {
+        setIsPanning(false);
+        setPan(panRef.current);
+        setZoom(zoomRef.current);
+    };
 
     const toggleTheme = () => {
         setWorkspaceTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -440,19 +533,18 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
             panRef.current = newPan;
             zoomRef.current = newZoom;
 
-            // Instant direct message (no state overhead)
-            iframeRef.current?.contentWindow?.postMessage({
-                type: 'updateTransform',
-                pan: newPan,
-                zoom: newZoom
-            }, '*');
+            // DIRECT DOM UPDATE - 90FPS GOAL
+            if (iframeRef.current) {
+                iframeRef.current.style.transform = `translate3d(${newPan.x}px, ${newPan.y}px, 0) scale(${newZoom})`;
+            }
 
-            // Throttled state update for UI only (zoom %)
+            // Throttled UI update for zoom % only (direct DOM)
             if (!window.zoomSyncPending) {
                 window.zoomSyncPending = true;
                 requestAnimationFrame(() => {
-                    setZoom(zoomRef.current);
-                    setPan(panRef.current);
+                    if (zoomIndicatorRef.current) {
+                        zoomIndicatorRef.current.innerText = `${Math.round(zoomRef.current * 100)}%`;
+                    }
                     window.zoomSyncPending = false;
                 });
             }
@@ -634,12 +726,7 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
                     window.addEventListener('message', (event) => {
                         const { type, pan, zoom, code, theme, showGrid, isAnimating } = event.data;
                         if (type === 'updateTransform') {
-                            const container = getContainer();
-                            if (container) {
-                                if (isAnimating) container.classList.add('animating');
-                                else container.classList.remove('animating');
-                                container.style.transform = 'translate(' + pan.x + 'px, ' + pan.y + 'px) scale(' + zoom + ')';
-                            }
+                            // Transformation logic shifted to the parent for 90FPS smoothness
                         }
                         if (type === 'updateContent') {
                             if (theme) updateStyles(theme);
@@ -758,7 +845,7 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
                                 <div className="flex items-center gap-2 flex-1 justify-center md:justify-start">
                                     <div className={`flex items-center gap-2 md:gap-2.5 normal-case font-mono text-[10px] md:text-[11px] px-2 md:px-3 py-1 rounded-xl border transition-all ${workspaceTheme === 'dark' ? 'text-zinc-300 bg-zinc-800/50 border-white/10' : 'text-zinc-600 bg-white/80 border-zinc-200 shadow-sm'}`}>
                                         <button onClick={handleZoomOut} className="hover:text-blue-400 transition-colors p-0.5" title="Out"><FaSearchMinus className="w-3.5 h-3.5" /></button>
-                                        <span className="min-w-[40px] md:min-w-[45px] text-center border-x border-white/10 px-1 md:px-2 font-bold font-mono text-blue-500">{Math.round(zoom * 100)}%</span>
+                                        <span ref={zoomIndicatorRef} className="min-w-[40px] md:min-w-[45px] text-center border-x border-white/10 px-1 md:px-2 font-bold font-mono text-blue-500">{Math.round(zoom * 100)}%</span>
                                         <button onClick={handleZoomIn} className="hover:text-blue-400 transition-colors p-0.5" title="In"><FaSearchPlus className="w-3.5 h-3.5" /></button>
                                         <button onClick={handleResetAll} className="hover:text-amber-400 transition-colors ml-1 md:ml-1.5 p-0.5" title="Reset"><FaSyncAlt className="w-2.5 h-2.5" /></button>
                                     </div>
@@ -793,9 +880,12 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
                             className={`flex-1 flex items-center justify-center relative overflow-hidden ${isFullscreen ? (workspaceTheme === 'dark' ? 'bg-[#09090b]' : 'bg-white') : ''}`}
                             onMouseDown={() => setIsPanning(true)}
                             onWheel={handleWheel}
-                            style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                            style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
                         >
-                            <div className="absolute inset-0 z-10" />
+                            <div className="absolute inset-0 z-10 pointer-events-none" />
                             {isFullscreen && (
                                 <div className="absolute top-4 md:top-8 right-4 md:right-8 z-[60] flex items-center gap-2 md:gap-3">
                                     <button
@@ -825,7 +915,19 @@ const MermaidWorkspace = ({ isOpen, onClose, initialCode }) => {
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Quick Edit</span>
                                 </button>
                             )}
-                            <iframe ref={iframeRef} srcDoc={srcDoc} className="w-full h-full border-none pointer-events-none" title="Mermaid Preview" />
+                            <iframe
+                                ref={iframeRef}
+                                srcDoc={srcDoc}
+                                className="w-full h-full border-none pointer-events-none transition-none"
+                                title="Mermaid Preview"
+                                style={{
+                                    willChange: 'transform',
+                                    transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`,
+                                    backfaceVisibility: 'hidden',
+                                    perspective: '1000px',
+                                    transformOrigin: '0 0'
+                                }}
+                            />
                         </div>
 
                         <div className={`px-6 py-3 border-t flex justify-end gap-3 shrink-0 z-10 ${workspaceTheme === 'dark' ? 'bg-zinc-900/40 border-white/5' : 'bg-zinc-50/50 border-zinc-100'}`}>

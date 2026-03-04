@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 
 import React, { useRef, useState, useEffect } from 'react'
-import { FaPaperPlane, FaStop, FaImage, FaTimes, FaFileAlt, FaMicrophone, FaBookOpen, FaGlobe, FaBookmark, FaRedo, FaTrash, FaRobot, FaBrain } from 'react-icons/fa'
+import { FaPaperPlane, FaStop, FaImage, FaTimes, FaFileAlt, FaMicrophone, FaGlobe, FaRedo, FaTrash, FaRobot, FaBrain } from 'react-icons/fa'
 import { TbPhotoPlus } from "react-icons/tb"
 import useSpeechToText from '../hooks/useSpeechToText'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -121,12 +121,10 @@ const PromptForm = ({
                     </div>
 
                     {/* Bottom Section: Controls & Attachments inside the bar */}
-                    <div className="flex items-center justify-between px-3 pb-3 pt-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-3 pb-3 pt-1">
 
-                        {/* Left: Model Selector & Attachments */}
-                        <div className="flex items-center gap-2">
-                            {/* Model Pill */}
-                            {/* Model Pill */}
+                        {/* Mobile Top Row / Desktop Left: Model Selector */}
+                        <div className="flex items-center">
                             <div className="relative" ref={modelMenuRef}>
                                 <button
                                     type="button"
@@ -165,157 +163,142 @@ const PromptForm = ({
                                     </div>
                                 )}
                             </div>
-
-                            {/* Web Search Toggle Button */}
-                            <button
-                                type="button"
-                                onClick={() => setIsWebSearchEnabled(!isWebSearchEnabled)}
-                                className={`group flex items-center justify-center p-2 rounded-full transition-all duration-200 hover:bg-zinc-700/50 ${isWebSearchEnabled ? 'bg-zinc-700/50' : ''}`}
-                                title={isWebSearchEnabled ? t('input.webSearchOn') : t('input.webSearchOff')}
-                            >
-                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isWebSearchEnabled
-                                    ? 'bg-emerald-500/20 backdrop-blur-md border border-emerald-500/50 shadow-lg shadow-emerald-500/20'
-                                    : 'bg-zinc-500/10 border border-zinc-500/30 group-hover:bg-emerald-500/10'
-                                    }`}>
-                                    <FaGlobe className={`w-3 h-3 ${isWebSearchEnabled ? 'text-emerald-400' : 'text-zinc-500'}`} />
-                                </div>
-                            </button>
-
-                            {/* Global File Upload Button (PDF/TXT/MD) */}
-                            <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="group flex items-center justify-center p-2 rounded-full transition-all duration-200 hover:bg-zinc-700/50"
-                                title={t('input.attachDocument')}
-                            >
-                                <div className="w-5 h-5 rounded-lg bg-orange-500/20 backdrop-blur-md border border-orange-500/30 flex items-center justify-center shadow-lg shadow-orange-500/10 group-hover:bg-orange-500/30 transition-all">
-                                    <FaFileAlt className="w-3 h-3 text-orange-400" />
-                                </div>
-                            </button>
-
-                            {/* Image Upload Button */}
-                            {isVisionModel && (
-                                <button
-                                    type="button"
-                                    onClick={() => imageInputRef.current?.click()}
-                                    className="group flex items-center justify-center p-2 rounded-full transition-all duration-200 hover:bg-zinc-700/50"
-                                    title={t('input.attachImage')}
-                                >
-                                    <div className="w-5 h-5 rounded-lg bg-blue-500/20 backdrop-blur-md border border-blue-500/30 flex items-center justify-center shadow-lg shadow-blue-500/10 group-hover:bg-blue-500/30 transition-all">
-                                        <TbPhotoPlus className="w-3 h-3 text-blue-400" />
-                                    </div>
-                                </button>
-                            )}
-                            {hasRecognitionSupport && (
-                                <button
-                                    type="button"
-                                    onClick={handleMicClick}
-                                    className={`p-2 rounded-full transition-all duration-200 ${isListening
-                                        ? 'text-red-500 dark:text-red-400 bg-red-500/10 hover:bg-red-500/20 animate-pulse'
-                                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50'
-                                        }`}
-                                    title={isListening ? t('input.stopListening') : t('input.voiceInput')}
-                                >
-                                    <FaMicrophone className="w-4 h-4" />
-                                </button>
-                            )}
-
-                            {/* Prompt Library Button */}
-                            <button
-                                type="button"
-                                onClick={onOpenLibrary}
-                                className="p-2 rounded-full transition-all duration-200 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50"
-                                title={t('input.promptLibrary')}
-                            >
-                                <FaBookmark className="w-4 h-4" />
-                            </button>
                         </div>
 
-                        {/* Right: Actions */}
-                        <div className="flex items-center gap-2">
-                            {/* Attachments Preview (inline) */}
-                            {(imageData || attachedFiles.length > 0) && (
-                                <div className="flex items-center gap-2 mr-2">
-                                    {imageData && (
-                                        <div className="relative group/preview">
-                                            <div className="w-8 h-8 rounded overflow-hidden border border-zinc-600">
-                                                <img src={imageData} alt="Preview" className="w-full h-full object-cover" />
-                                            </div>
-                                            <button onClick={clearImage} className="absolute -top-1 -right-1 bg-zinc-900 text-red-400 rounded-full p-0.5 opacity-0 group-hover/preview:opacity-100 transition-opacity">
-                                                <FaTimes className="w-2 h-2" />
-                                            </button>
-                                        </div>
-                                    )}
-                                    {attachedFiles.map(file => (
-                                        <div key={file.id} className="relative group/preview">
-                                            <div className="px-2 py-1 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-700/50 rounded-lg text-[10px] text-zinc-600 dark:text-zinc-400 max-w-[100px] truncate flex items-center gap-1.5 shadow-sm">
-                                                <FaFileAlt className="w-2.5 h-2.5 text-orange-400" />
-                                                {file.name}
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => onRemoveFile(file.id)}
-                                                className="absolute -top-2 -right-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-red-500 rounded-full p-0.5 opacity-0 group-hover/preview:opacity-100 transition-all shadow-md active:scale-90"
-                                            >
-                                                <FaTimes className="w-2 h-2" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                        {/* Mobile Bottom Row / Desktop Right: Icons & Actions */}
+                        <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 w-full sm:w-auto overflow-x-auto sm:overflow-x-visible no-scrollbar">
 
-                            {/* Clear Button */}
-                            {!loading && !disableClear && (
+                            {/* Input Icons Group */}
+                            <div className="flex items-center gap-1 sm:gap-1.5">
+                                {/* Web Search */}
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        onPromptChange('');
-                                        if (clearImage) clearImage();
-                                        if (clearFiles) clearFiles();
-                                    }}
-                                    className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                    title={t('app.clear')}
+                                    onClick={() => setIsWebSearchEnabled(!isWebSearchEnabled)}
+                                    className={`group flex items-center justify-center p-1.5 rounded-full transition-all duration-200 hover:bg-zinc-700/50 ${isWebSearchEnabled ? 'bg-zinc-700/50' : ''}`}
+                                    title={isWebSearchEnabled ? t('input.webSearchOn') : t('input.webSearchOff')}
                                 >
-                                    <FaTrash className="w-4 h-4" />
+                                    <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isWebSearchEnabled
+                                        ? 'bg-emerald-500/20 backdrop-blur-md border border-emerald-500/50 shadow-lg shadow-emerald-500/20'
+                                        : 'bg-zinc-500/10 border border-zinc-500/30 group-hover:bg-emerald-500/10'
+                                        }`}>
+                                        <FaGlobe className={`w-3 h-3 ${isWebSearchEnabled ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                                    </div>
                                 </button>
-                            )}
 
-                            {/* Regenerate Button */}
-                            {!loading && messages?.length > 0 && onRegenerate && (
+                                {/* File Attachment */}
                                 <button
                                     type="button"
-                                    onClick={onRegenerate}
-                                    className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                                    title="Regenerate Last Response"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="group flex items-center justify-center p-1.5 rounded-full transition-all duration-200 hover:bg-zinc-700/50"
+                                    title={t('input.attachDocument')}
                                 >
-                                    <FaRedo className="w-4 h-4" />
+                                    <div className="w-5 h-5 rounded-lg bg-orange-500/20 backdrop-blur-md border border-orange-500/30 flex items-center justify-center shadow-lg shadow-orange-500/10 group-hover:bg-orange-500/30 transition-all">
+                                        <FaFileAlt className="w-3 h-3 text-orange-400" />
+                                    </div>
                                 </button>
-                            )}
 
-                            {/* Send / Stop Button */}
-                            <button
-                                type='submit'
-                                onClick={(e) => {
-                                    if (loading && onStop) {
-                                        e.preventDefault();
-                                        onStop();
-                                    }
-                                }}
-                                disabled={disableSubmit && !loading} // specific logic: disable if no input AND not loading. If loading, we want it enabled to stop.
-                                className={`p-2.5 rounded-full transition-all duration-200 ${loading
-                                    ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/30'
-                                    : !disableSubmit
-                                        ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30 active:scale-95'
-                                        : 'bg-zinc-300 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-500 cursor-not-allowed opacity-50'
-                                    }`}
-                                title={loading ? 'Stop Generating' : 'Send Message'}
-                            >
-                                {loading ? (
-                                    <FaStop className='w-4 h-4' />
-                                ) : (
-                                    <FaPaperPlane className='w-4 h-4' />
+                                {/* Image Upload */}
+                                {isVisionModel && (
+                                    <button
+                                        type="button"
+                                        onClick={() => imageInputRef.current?.click()}
+                                        className="group flex items-center justify-center p-1.5 rounded-full transition-all duration-200 hover:bg-zinc-700/50"
+                                        title={t('input.attachImage')}
+                                    >
+                                        <div className="w-5 h-5 rounded-lg bg-blue-500/20 backdrop-blur-md border border-blue-500/30 flex items-center justify-center shadow-lg shadow-blue-500/10 group-hover:bg-blue-500/30 transition-all">
+                                            <TbPhotoPlus className="w-3 h-3 text-blue-400" />
+                                        </div>
+                                    </button>
                                 )}
-                            </button>
+
+                                {/* Mic */}
+                                {hasRecognitionSupport && (
+                                    <button
+                                        type="button"
+                                        onClick={handleMicClick}
+                                        className={`p-1.5 rounded-full transition-all duration-200 ${isListening
+                                            ? 'text-red-500 dark:text-red-400 bg-red-500/10 hover:bg-red-500/20 animate-pulse'
+                                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50'
+                                            }`}
+                                        title={isListening ? t('input.stopListening') : t('input.voiceInput')}
+                                    >
+                                        <FaMicrophone className="w-4 h-4" />
+                                    </button>
+                                )}
+
+                            </div>
+
+                            {/* Actions Group (Trash, Regenerate, Send) */}
+                            <div className="flex items-center gap-1.5 ml-auto">
+                                {/* Attachments Preview */}
+                                {(imageData || attachedFiles.length > 0) && (
+                                    <div className="flex items-center gap-1.5 mr-1 hidden sm:flex">
+                                        {imageData && (
+                                            <div className="relative group/preview">
+                                                <div className="w-6 h-6 rounded overflow-hidden border border-zinc-600">
+                                                    <img src={imageData} alt="Preview" className="w-full h-full object-cover" />
+                                                </div>
+                                                <button onClick={clearImage} className="absolute -top-1 -right-1 bg-zinc-900 text-red-400 rounded-full p-0.5 opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                                                    <FaTimes className="w-2 h-2" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Clear Button */}
+                                {!loading && !disableClear && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onPromptChange('');
+                                            if (clearImage) clearImage();
+                                            if (clearFiles) clearFiles();
+                                        }}
+                                        className="p-1.5 text-zinc-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                        title={t('app.clear')}
+                                    >
+                                        <FaTrash className="w-4 h-4" />
+                                    </button>
+                                )}
+
+                                {/* Regenerate Button */}
+                                {!loading && messages?.length > 0 && onRegenerate && (
+                                    <button
+                                        type="button"
+                                        onClick={onRegenerate}
+                                        className="p-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                                        title="Regenerate Last Response"
+                                    >
+                                        <FaRedo className="w-4 h-4" />
+                                    </button>
+                                )}
+
+                                {/* Send / Stop Button */}
+                                <button
+                                    type='submit'
+                                    onClick={(e) => {
+                                        if (loading && onStop) {
+                                            e.preventDefault();
+                                            onStop();
+                                        }
+                                    }}
+                                    disabled={disableSubmit && !loading}
+                                    className={`p-2.5 rounded-full transition-all duration-200 ${loading
+                                        ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/30'
+                                        : !disableSubmit
+                                            ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30 active:scale-95'
+                                            : 'bg-zinc-300 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-500 cursor-not-allowed opacity-50'
+                                        }`}
+                                    title={loading ? 'Stop Generating' : 'Send Message'}
+                                >
+                                    {loading ? (
+                                        <FaStop className='w-4 h-4' />
+                                    ) : (
+                                        <FaPaperPlane className='w-4 h-4' />
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
 

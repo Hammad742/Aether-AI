@@ -36,7 +36,8 @@ const SettingsModal = ({ isOpen, onClose, initialPrompt, onDeleteAll, onExportDa
     useEffect(() => {
         setPrompt(initialPrompt || '');
         if (isOpen) {
-            setShowMobileMenu(true);
+            // On mobile, show the menu only if no specific tab is requested (or if it's the general tab)
+            setShowMobileMenu(!initialTab || initialTab === 'general');
             if (initialTab) setActiveTab(initialTab);
             // Reset validation state when opening
             setIsSuccess(false);

@@ -13,7 +13,6 @@ import QuickActions from './components/QuickActions'
 import SettingsModal from './components/SettingsModal'
 import ApiKeyRequirementModal from './components/ApiKeyRequirementModal'
 import Sidebar from './components/Sidebar'
-import PromptLibraryModal from './components/PromptLibraryModal'
 import ImageGalleryModal from './components/ImageGalleryModal';
 import VoiceInteractionModal from './components/VoiceInteractionModal';
 import MermaidWorkspace from './components/MermaidWorkspace';
@@ -52,7 +51,7 @@ const AuthenticatedApp = () => {
     } = useChatHistory();
 
     const [messages, setMessages] = useState([])
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [prompt, setPrompt] = useState('')
     const [imageData, setImageData] = useState(null)
     const [attachedFiles, setAttachedFiles] = useState([])
@@ -61,7 +60,6 @@ const AuthenticatedApp = () => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [settingsInitialTab, setSettingsInitialTab] = useState('general');
     const [isApiKeyPopupOpen, setIsApiKeyPopupOpen] = useState(false);
-    const [isPromptLibraryOpen, setIsPromptLibraryOpen] = useState(false);
     const [isWebSearchEnabled, setIsWebSearchEnabled] = useState(false);
     const [isArtifactOpen, setIsArtifactOpen] = useState(false);
     const [artifactCode, setArtifactCode] = useState('');
@@ -85,14 +83,16 @@ const AuthenticatedApp = () => {
             const session = sessions.find(s => s.id === currentSessionId);
             if (session) {
                 const sessionMessages = session.messages || [];
-                if (JSON.stringify(messages) !== JSON.stringify(sessionMessages)) {
+                // Efficient check: only update if lengths differ or it's a new session
+                // This avoids expensive JSON.stringify on every re-render
+                if (messages.length !== sessionMessages.length) {
                     setMessages(sessionMessages);
                 }
             }
         } else if (!currentSessionId) {
             if (messages.length > 0) setMessages([]);
         }
-    }, [currentSessionId, sessions, messages]);
+    }, [currentSessionId, sessions, messages.length]);
 
     const handleApiKeyChange = (newKey) => {
         setUserApiKey(newKey)
@@ -126,7 +126,8 @@ const AuthenticatedApp = () => {
     useEffect(() => {
         if (messages.length > 0 && currentSessionId) {
             const currentSession = sessions.find(s => s.id === currentSessionId);
-            if (currentSession && JSON.stringify(currentSession.messages) !== JSON.stringify(messages)) {
+            // Save only if message count is different to avoid constant stringify
+            if (currentSession && currentSession.messages?.length !== messages.length) {
                 saveMessageToCurrentSession(messages);
             }
         }
@@ -459,13 +460,13 @@ const AuthenticatedApp = () => {
                                 <div className="flex-1 flex flex-col items-center justify-center gap-6 sm:gap-8 w-full animate-in fade-in duration-500">
                                     <h2 className="text-2xl sm:text-3xl font-semibold text-zinc-800 dark:text-zinc-200 text-center">{t('app.emptyState')}</h2>
                                     <div className="w-full max-w-3xl flex flex-col gap-6">
-                                        <PromptForm prompt={prompt} onPromptChange={setPrompt} onSubmit={handleSubmit} onStop={handleStop} onRegenerate={handleRegenerate} messages={messages} models={MODELS} selectedModel={selectedModel} onModelChange={handleModelChange} isVisionModel={isVisionModel} isNovaFileModel={isNovaFileModel} onImageChange={handleImageChange} onFileChange={handleFileChange} imageData={imageData} attachedFiles={attachedFiles} onRemoveFile={removeFile} clearImage={clearImage} clearFiles={clearFiles} loading={loading} imageInputRef={imageInputRef} fileInputRef={fileInputRef} isWebSearchEnabled={isWebSearchEnabled} setIsWebSearchEnabled={setIsWebSearchEnabled} onOpenLibrary={() => setIsPromptLibraryOpen(true)} userApiKey={userApiKey} />
+                                        <PromptForm prompt={prompt} onPromptChange={setPrompt} onSubmit={handleSubmit} onStop={handleStop} onRegenerate={handleRegenerate} messages={messages} models={MODELS} selectedModel={selectedModel} onModelChange={handleModelChange} isVisionModel={isVisionModel} isNovaFileModel={isNovaFileModel} onImageChange={handleImageChange} onFileChange={handleFileChange} imageData={imageData} attachedFiles={attachedFiles} onRemoveFile={removeFile} clearImage={clearImage} clearFiles={clearFiles} loading={loading} imageInputRef={imageInputRef} fileInputRef={fileInputRef} isWebSearchEnabled={isWebSearchEnabled} setIsWebSearchEnabled={setIsWebSearchEnabled} userApiKey={userApiKey} />
                                         <QuickActions onSelect={handleQuickActionSelect} onOpenEditor={() => setPrompt('Try "draw a Flowchart, Sequence , class... diagram"')} prompt={prompt} />
                                     </div>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="flex-1 overflow-y-auto mb-4 scroll-smooth pr-2 scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+                                    <div className="flex-1 overflow-y-auto mb-4 scroll-smooth pr-2 scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700 scrollbar-track-transparent main-chat-container">
                                         {messages.map((msg, index) => (
                                             <ChatMessage key={index} role={msg.role} content={msg.content} onOpenArtifact={(code) => { setArtifactCode(code); setIsArtifactOpen(true); }} />
                                         ))}
@@ -474,7 +475,7 @@ const AuthenticatedApp = () => {
                                         <div ref={messagesEndRef} />
                                     </div>
                                     <div className="mt-auto">
-                                        <PromptForm prompt={prompt} onPromptChange={setPrompt} onSubmit={handleSubmit} onStop={handleStop} onRegenerate={handleRegenerate} messages={messages} models={MODELS} selectedModel={selectedModel} onModelChange={handleModelChange} isVisionModel={isVisionModel} isNovaFileModel={isNovaFileModel} onImageChange={handleImageChange} onFileChange={handleFileChange} imageData={imageData} attachedFiles={attachedFiles} onRemoveFile={removeFile} clearImage={clearImage} clearFiles={clearFiles} loading={loading} imageInputRef={imageInputRef} fileInputRef={fileInputRef} isWebSearchEnabled={isWebSearchEnabled} setIsWebSearchEnabled={setIsWebSearchEnabled} onOpenLibrary={() => setIsPromptLibraryOpen(true)} userApiKey={userApiKey} />
+                                        <PromptForm prompt={prompt} onPromptChange={setPrompt} onSubmit={handleSubmit} onStop={handleStop} onRegenerate={handleRegenerate} messages={messages} models={MODELS} selectedModel={selectedModel} onModelChange={handleModelChange} isVisionModel={isVisionModel} isNovaFileModel={isNovaFileModel} onImageChange={handleImageChange} onFileChange={handleFileChange} imageData={imageData} attachedFiles={attachedFiles} onRemoveFile={removeFile} clearImage={clearImage} clearFiles={clearFiles} loading={loading} imageInputRef={imageInputRef} fileInputRef={fileInputRef} isWebSearchEnabled={isWebSearchEnabled} setIsWebSearchEnabled={setIsWebSearchEnabled} userApiKey={userApiKey} />
                                     </div>
                                 </>
                             )}
@@ -486,7 +487,6 @@ const AuthenticatedApp = () => {
             <MermaidWorkspace isOpen={isArtifactOpen} onClose={() => setIsArtifactOpen(false)} initialCode={artifactCode} />
             <ApiKeyRequirementModal isOpen={isApiKeyPopupOpen} onClose={() => setIsApiKeyPopupOpen(false)} onOpenSettings={() => { setIsApiKeyPopupOpen(false); handleOpenSettings('security'); }} />
             <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} initialPrompt={systemPrompt} onSave={setSystemPrompt} onArchiveAll={archiveAllChats} onDeleteAll={deleteAllSessions} onExport={exportData} initialTab={settingsInitialTab} apiKey={userApiKey} onApiKeyChange={handleApiKeyChange} />
-            <PromptLibraryModal isOpen={isPromptLibraryOpen} onClose={() => setIsPromptLibraryOpen(false)} onSelect={handleQuickActionSelect} />
             <ImageGalleryModal isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} onReusePrompt={(p) => setPrompt(`/imagine ${p}`)} />
             <VoiceInteractionModal isOpen={isVoiceOpen} onClose={() => setIsVoiceOpen(false)} onSubmit={handleVoiceSubmit} lastResponse={answer} isGenerating={loading} t={t} />
         </div>

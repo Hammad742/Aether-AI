@@ -226,29 +226,29 @@ const VoiceInteractionModal = ({ isOpen, onClose, onSubmit, lastResponse, isGene
             <div className="relative w-full max-w-xl glass-apple rounded-[3rem] shadow-2xl overflow-hidden flex flex-col transition-all aspect-square sm:aspect-auto sm:h-[600px]">
 
                 {/* Header Actions */}
-                <div className="absolute top-8 right-8 flex items-center gap-3 z-20">
+                <div className="absolute top-4 right-4 sm:top-8 sm:right-8 flex items-center gap-2 sm:gap-3 z-20">
                     <button
                         onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
-                        className={`p-4 rounded-full transition-all ${isMuted ? 'bg-red-500/10 text-red-500 scale-110' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'}`}
+                        className={`p-3 sm:p-4 rounded-full transition-all ${isMuted ? 'bg-red-500/10 text-red-500 scale-110' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'}`}
                         title={isMuted ? 'Unmute' : 'Mute AI Voice'}
                     >
                         {isMuted ? <FaVolumeMute className="w-5 h-5" /> : <FaVolumeUp className="w-5 h-5" />}
                     </button>
                     <button
                         onClick={onClose}
-                        className="p-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full transition-colors text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                        className="p-3 sm:p-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full transition-colors text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
                     >
                         <FaTimes className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Main Visualizer Body */}
-                <div className="flex-1 flex flex-col items-center justify-center p-10 gap-16">
+                <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 gap-8 sm:gap-16">
                     <div className="relative flex items-center justify-center">
 
                         {/* Status-Based Animation */}
                         <div className={`
-                            relative z-10 w-44 h-44 rounded-full flex items-center justify-center transition-all duration-700
+                            relative z-10 w-32 h-32 sm:w-44 sm:h-44 rounded-full flex items-center justify-center transition-all duration-700
                             ${status === STATUS.SPEAKING
                                 ? 'bg-accent-DEFAULT shadow-[0_0_80px_rgba(var(--accent-rgb),0.6)] scale-110'
                                 : status === STATUS.THINKING
@@ -284,12 +284,12 @@ const VoiceInteractionModal = ({ isOpen, onClose, onSubmit, lastResponse, isGene
                         )}
                     </div>
 
-                    <div className="w-full text-center space-y-6">
+                    <div className="w-full text-center space-y-4 sm:space-y-6">
                         <div className="space-y-2">
-                            <span className="text-xs font-bold uppercase tracking-[0.2em] text-accent-DEFAULT bg-accent-DEFAULT/10 px-3 py-1 rounded-full">
+                            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-accent-DEFAULT bg-accent-DEFAULT/10 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
                                 {status === STATUS.LISTENING ? t('status.listening') || 'LISTENING' : status === STATUS.SPEAKING ? t('status.speaking') || 'SPEAKING' : status === STATUS.THINKING ? t('status.thinking') || 'THINKING' : 'IDLE'}
                             </span>
-                            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 h-10">
+                            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 h-8 sm:h-10">
                                 {status === STATUS.LISTENING ? (transcript ? '' : 'Say something...') : status === STATUS.SPEAKING ? 'AI is replying...' : status === STATUS.THINKING ? 'AI is thinking...' : 'Wait a moment...'}
                             </h2>
                         </div>
@@ -303,7 +303,7 @@ const VoiceInteractionModal = ({ isOpen, onClose, onSubmit, lastResponse, isGene
                 </div>
 
                 {/* Interactive Bar */}
-                <div className="p-10 flex flex-wrap justify-center gap-4 bg-zinc-400/10 dark:bg-zinc-800/30 border-t border-zinc-200/20 dark:border-zinc-700/20">
+                <div className="p-6 sm:p-10 flex flex-wrap justify-center gap-4 bg-zinc-400/10 dark:bg-zinc-800/30 border-t border-zinc-200/20 dark:border-zinc-700/20">
                     {status === STATUS.LISTENING && (
                         <button
                             onClick={handleDone}

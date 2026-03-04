@@ -154,6 +154,9 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
+  /* GPU Acceleration for UI stability */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .glass-apple {
@@ -367,4 +370,15 @@ button {
 
 .animate-soft-pulse {
   animation: soft-pulse 4s ease-in-out infinite;
+}
+/* 90FPS GLOBAL OPTIMIZATION LAYER */
+.main-chat-container {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  -webkit-overflow-scrolling: touch;
+}
+
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
 }

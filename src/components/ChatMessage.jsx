@@ -41,7 +41,7 @@ const ChatMessage = ({ role, content, model, onOpenArtifact }) => {
                         {!isUser && supported && (
                             <button
                                 onClick={handleSpeechClick}
-                                className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full ${isSpeaking ? 'text-accent dark:text-accent-light bg-accent-light/10' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800'}`}
+                                className={`sm:opacity-0 sm:group-hover:opacity-100 transition-opacity p-1 rounded-full ${isSpeaking ? 'text-accent dark:text-accent-light bg-accent-light/10' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800'}`}
                                 title={isSpeaking ? "Stop speaking" : "Read aloud"}
                             >
                                 {isSpeaking ? <FaStop className="w-3 h-3" /> : <FaVolumeUp className="w-3 h-3" />}
@@ -55,7 +55,7 @@ const ChatMessage = ({ role, content, model, onOpenArtifact }) => {
                                         onOpenArtifact(match[1].trim());
                                     }
                                 }}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 text-[10px] font-bold flex items-center gap-1.5 uppercase tracking-tight"
+                                className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity p-1.5 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 text-[10px] font-bold flex items-center gap-1.5 uppercase tracking-tight"
                                 title="Open in Aether Workspace"
                             >
                                 <FaProjectDiagram className="w-3 h-3" />
@@ -89,4 +89,4 @@ const ChatMessage = ({ role, content, model, onOpenArtifact }) => {
     );
 };
 
-export default ChatMessage;
+export default React.memo(ChatMessage);

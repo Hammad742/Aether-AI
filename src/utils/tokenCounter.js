@@ -41,5 +41,11 @@ export const calculateSessionTokens = (messages, systemPrompt = '', currentPromp
         });
     }
 
-    return estimateTokens(' '.repeat(totalChars));
+    return estimateTokensFromLength(totalChars);
+};
+
+// Simplified estimator that takes a character length directly
+export const estimateTokensFromLength = (length) => {
+    if (length <= 0) return 0;
+    return Math.max(1, Math.ceil(length / 4));
 };
