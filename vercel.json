@@ -1,10 +1,6 @@
 {
     "rewrites": [
         {
-            "source": "/hf-api/(.*)",
-            "destination": "https://router.huggingface.co/hf-inference/models/$1"
-        },
-        {
             "source": "/ddg-api/(.*)",
             "destination": "https://html.duckduckgo.com/$1"
         },

@@ -14,12 +14,6 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/pollinations/, ''),
         secure: false, // In case of SSL issues
       },
-      '/hf-api': {
-        target: 'https://router.huggingface.co/hf-inference/models',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/hf-api/, ''),
-        secure: false,
-      },
       '/ddg-api': {
         target: 'https://html.duckduckgo.com',
         changeOrigin: true,

@@ -13,7 +13,7 @@ export const generateImage = async (prompt, model = DEFAULT_MODEL) => {
 
     try {
         const response = await fetch(
-            `/hf-api/${model}`,
+            `https://router.huggingface.co/hf-inference/models/${model}`,
             {
                 headers: {
                     Authorization: `Bearer ${HF_API_KEY}`,
