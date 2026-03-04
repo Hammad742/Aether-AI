@@ -1,6 +1,14 @@
 {
     "rewrites": [
         {
+            "source": "/hf-api/(.*)",
+            "destination": "https://router.huggingface.co/hf-inference/$1"
+        },
+        {
+            "source": "/ddg-api/(.*)",
+            "destination": "https://html.duckduckgo.com/$1"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }
