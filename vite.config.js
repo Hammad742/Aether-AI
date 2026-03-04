@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/Aether-AI/',
+  base: process.env.GITHUB_ACTIONS ? '/Aether-AI/' : '/',
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
