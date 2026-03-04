@@ -15,7 +15,7 @@ export default defineConfig({
         secure: false, // In case of SSL issues
       },
       '/hf-api': {
-        target: 'https://api-inference.huggingface.co',
+        target: 'https://router.huggingface.co',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/hf-api/, ''),
         secure: false,
