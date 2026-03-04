@@ -4,7 +4,7 @@
  */
 
 const HF_API_KEY = import.meta.env.VITE_HF_API_KEY;
-const DEFAULT_MODEL = "black-forest-labs/FLUX.1-schnell";
+const DEFAULT_MODEL = "stabilityai/stable-diffusion-xl-base-1.0";
 
 export const generateImage = async (prompt, model = DEFAULT_MODEL) => {
     if (!HF_API_KEY) {
@@ -13,7 +13,7 @@ export const generateImage = async (prompt, model = DEFAULT_MODEL) => {
 
     try {
         const response = await fetch(
-            `/hf-api/${model}`,
+            `/hf-api/models/${model}`,
             {
                 headers: {
                     Authorization: `Bearer ${HF_API_KEY}`,
