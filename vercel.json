@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/hf-api/(.*)",
-            "destination": "https://router.huggingface.co/$1"
+            "destination": "https://router.huggingface.co/hf-inference/models/$1"
         },
         {
             "source": "/ddg-api/(.*)",
