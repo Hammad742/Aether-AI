@@ -190,7 +190,11 @@ const AuthenticatedApp = () => {
         setIsSettingsOpen(true);
     };
 
-    const sessionTokens = useMemo(() => calculateSessionTokens(messages, systemPrompt, prompt), [messages, systemPrompt, prompt]);
+    const sessionTokens = useMemo(() => {
+        // Debounce or simplify counting if the history is massive
+        if (messages.length > 50) return calculateSessionTokens(messages.slice(-20), systemPrompt, prompt);
+        return calculateSessionTokens(messages, systemPrompt, prompt);
+    }, [messages, systemPrompt, prompt]);
 
     const handleRegenerate = async () => {
         if (loading || messages.length === 0) return;
@@ -199,11 +203,22 @@ const AuthenticatedApp = () => {
         if (lastMsg.role === 'assistant') newMessages.pop();
         const lastUserMsg = newMessages[newMessages.length - 1];
         if (!lastUserMsg || lastUserMsg.role !== 'user') return;
+
         setMessages(newMessages);
+        const activeSessionId = currentSessionId;
+
+        // Support for image generation regeneration
+        if (typeof lastUserMsg.content === 'string' && lastUserMsg.content.toLowerCase().startsWith('/imagine ')) {
+            await processImageGeneration(lastUserMsg.content, activeSessionId);
+            return;
+        }
+
         try {
             const finalResponse = await sendMessage(selectedModel.id, newMessages);
             if (finalResponse) {
-                setMessages(prev => [...prev, { role: 'assistant', content: finalResponse }]);
+                const botMessage = { role: 'assistant', content: finalResponse };
+                setMessages(prev => [...prev, botMessage]);
+                saveMessageToCurrentSession(botMessage, activeSessionId);
                 resetChat();
             }
         } catch (err) {

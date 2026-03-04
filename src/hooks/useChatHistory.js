@@ -35,14 +35,33 @@ export const useChatHistory = () => {
         }
     }, []);
 
-    // Save history whenever sessions change
-    useEffect(() => {
-        if (sessions.length > 0) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-        } else if (sessions.length === 0) {
+    // Optimized save helper
+    const saveToDisk = (data) => {
+        if (!data || data.length === 0) {
             localStorage.removeItem(STORAGE_KEY);
+            return;
         }
-    }, [sessions]);
+        // Save using requestIdleCallback to avoid blocking the main thread
+        const saveTask = () => {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.error('Failed to save chat history', e);
+            }
+        };
+
+        if (window.requestIdleCallback) {
+            window.requestIdleCallback(saveTask, { timeout: 1000 });
+        } else {
+            setTimeout(saveTask, 0);
+        }
+    };
+
+    // Save history only on specific triggers, not every re-render
+    const persistSessions = (updatedSessions) => {
+        setSessions(updatedSessions);
+        saveToDisk(updatedSessions);
+    };
 
     // Save folders whenever they change
     useEffect(() => {
@@ -61,7 +80,8 @@ export const useChatHistory = () => {
             messages: [],
             folderId: folderId
         };
-        setSessions(prev => [newSession, ...prev]);
+        const updated = [newSession, ...sessions];
+        persistSessions(updated);
         setCurrentSessionId(newSession.id);
         return newSession.id;
     };
@@ -73,7 +93,7 @@ export const useChatHistory = () => {
             return;
         }
 
-        setSessions(prev => prev.map(session => {
+        const updated = sessions.map(session => {
             if (session.id === targetId) {
                 // Generate a title based on the first user message if it's currently a default one
                 let title = session.title;
@@ -102,11 +122,13 @@ export const useChatHistory = () => {
                 };
             }
             return session;
-        }));
+        });
+        persistSessions(updated);
     };
 
     const deleteChat = (id) => {
-        setSessions(prev => prev.filter(s => s.id !== id));
+        const updated = sessions.filter(s => s.id !== id);
+        persistSessions(updated);
         if (id === currentSessionId) {
             setCurrentSessionId(null); // Or select next available?
         }
