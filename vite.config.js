@@ -4,7 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/Aether-AI/',
+  // Dynamically set base path: use root '/' for Vercel, and '/Aether-AI/' for GitHub Pages
+  base: process.env.VERCEL ? '/' : '/Aether-AI/',
   plugins: [react(), tailwindcss()],
   build: {
     target: 'esnext',
