@@ -82,12 +82,12 @@ const Login = ({ onLogin }) => {
     return (
         // Replaced min-h-screen with min-h-[100dvh] to prevent horrific mobile address-bar resize trailing repaints.
         <div
-            className="min-h-[100dvh] flex items-center justify-center p-4 relative overflow-hidden bg-black"
+            className="min-h-[100dvh] flex flex-col sm:flex-row items-center justify-center p-4 sm:p-8 relative overflow-hidden bg-black gap-8 sm:gap-0"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
         >
-            {/* Elegant Branding (V6: Node-Link Logo Integration) */}
-            <div className="absolute top-6 left-6 sm:top-8 sm:left-10 z-[10] select-none group">
+            {/* Elegant Branding (Responsive: Flows on mobile, Absolute on Desktop) */}
+            <div className="relative sm:absolute sm:top-8 sm:left-10 z-[10] select-none group mt-4 sm:mt-0">
                 <div className="relative px-6 py-4 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-white/10 group-hover:border-white/20 group-hover:drop-shadow-[0_0_50px_rgba(255,255,255,0.2)] flex items-center gap-4 overflow-hidden">
                     {/* Branding Logo (Crystalline Prism SVG) */}
                     <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
