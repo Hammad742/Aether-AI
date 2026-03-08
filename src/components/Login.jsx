@@ -97,11 +97,11 @@ const Login = ({ onLogin }) => {
                             <path d="M12 3V21" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
                             <path d="M4 7.5L20 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
                             <path d="M20 7.5L4 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
-                            
+
                             {/* Spectral Orbit Border Animation (Looped tracing) */}
                             <path d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" className="animate-spectral-orbit" style={{ opacity: 0.1 }} />
                         </svg>
-                        
+
                         {/* Logo Chromatic Ghosts */}
                         <svg className="absolute inset-0 z-0 text-cyan-400/0 group-hover:text-cyan-400/60 transition-all duration-1000 blur-[2px] animate-chroma pointer-events-none select-none" viewBox="0 0 24 24" fill="none" style={{ '--chroma-offset-x': '-3px', '--chroma-offset-y': '1px' }}>
                             <path d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
@@ -120,7 +120,7 @@ const Login = ({ onLogin }) => {
                     <div className="relative font-space-grotesk font-bold tracking-[0.3em] text-2xl sm:text-3xl text-white/70 dark:text-custom-primary/80 transition-all duration-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-white cursor-default flex items-center justify-center">
                         {/* Base Text */}
                         <span className="relative z-10">AETHER-AI</span>
-                        
+
                         {/* Text Chromatic Ghosts */}
                         <span className="absolute inset-0 z-0 text-cyan-400/0 group-hover:text-cyan-400/60 transition-all duration-1000 blur-[2px] animate-chroma pointer-events-none select-none" style={{ '--chroma-offset-x': '-3px', '--chroma-offset-y': '1px' }}>
                             AETHER-AI
@@ -138,9 +138,9 @@ const Login = ({ onLogin }) => {
             </div>
 
             {/* Interactive Parallax Background Layer */}
-            <div 
+            <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-[600ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] scale-[1.10] will-change-transform pointer-events-none z-0"
-                style={{ 
+                style={{
                     backgroundImage: 'url("/249037e8d6daa355b289ea8e8a6db766.jpg")',
                     transform: `translate3d(${mousePos.x * 20}px, ${mousePos.y * 20}px, 0) scale(1.10)`
                 }}
@@ -155,7 +155,7 @@ const Login = ({ onLogin }) => {
                 <div className="absolute top-[10%] left-[-50px] w-[2px] h-[2px] bg-white rounded-full shadow-[0_0_10px_white] animate-shooting-star" style={{ animationDelay: '0s' }}></div>
                 <div className="absolute top-[30%] left-[-50px] w-[1.5px] h-[1.5px] bg-white rounded-full shadow-[0_0_8px_white] animate-shooting-star" style={{ animationDelay: '7s' }}></div>
                 <div className="absolute top-[15%] left-[-50px] w-[1px] h-[1px] bg-white rounded-full shadow-[0_0_6px_white] animate-shooting-star" style={{ animationDelay: '14s' }}></div>
-                
+
                 {/* Floating Ethereal Orbs */}
                 <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-500/10 rounded-full blur-[60px] animate-float-orb" style={{ animationDelay: '0s' }}></div>
                 <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-purple-500/10 rounded-full blur-[80px] animate-float-orb" style={{ animationDelay: '4s' }}></div>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { API_URL } from '../constants/api';
+import { API_URL, HF_BASE_URL, DDG_BASE_URL } from '../constants/api';
 import { MODELS } from '../constants/models';
 
 export const useChat = (apiHeaders) => {
@@ -57,7 +57,7 @@ export const useChat = (apiHeaders) => {
                         if (!hfKey) throw new Error('Hugging Face API key is missing. Please add it to your .env file.');
 
                         const response = await fetch(
-                            `/hf/models/${modelId}`,
+                            `${HF_BASE_URL}/models/${modelId}`,
                             {
                                 headers: {
                                     Authorization: `Bearer ${hfKey}`,
@@ -126,7 +126,7 @@ export const useChat = (apiHeaders) => {
                         if (searchQuery) {
                             setAnswer("Searching the web...");
                             // Fetch DuckDuckGo HTML silently
-                            const searchRes = await fetch(`/ddg?q=${encodeURIComponent(searchQuery)}`);
+                            const searchRes = await fetch(`${DDG_BASE_URL}?q=${encodeURIComponent(searchQuery)}`);
                             const html = await searchRes.text();
 
                             // Naive extraction of snippet texts
