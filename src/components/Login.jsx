@@ -141,7 +141,7 @@ const Login = ({ onLogin }) => {
             <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-[600ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] scale-[1.10] will-change-transform pointer-events-none z-0"
                 style={{
-                    backgroundImage: 'url("/249037e8d6daa355b289ea8e8a6db766.jpg")',
+                    backgroundImage: `url("${import.meta.env.BASE_URL}249037e8d6daa355b289ea8e8a6db766.jpg")`,
                     transform: `translate3d(${mousePos.x * 20}px, ${mousePos.y * 20}px, 0) scale(1.10)`
                 }}
             ></div>
