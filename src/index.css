@@ -1,0 +1,475 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: #020617;
+  color: #e2e8f0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ==========================================================================
+   GLOBAL MOBILE TOUCH-RESPONSE ENGINE (0ms Lag Native App Feel)
+   ========================================================================== */
+@media (hover: none) and (pointer: coarse) {
+  /* Eradicate the 300ms HTML tap delay and ugly blue web highlights */
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation;
+  }
+
+  /* Universal hardware-accelerated tactile response for ALL interactive elements */
+  button, 
+  a, 
+  [role="button"], 
+  .cursor-pointer,
+  .hover-item {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease-out, background-color 0.15s ease-out !important;
+  }
+  
+  /* The physical "Depress" effect mimicking iOS/Android native buttons */
+  button:active, 
+  a:active, 
+  [role="button"]:active, 
+  .cursor-pointer:active,
+  .hover-item:active {
+    transform: scale(0.95) !important;
+    opacity: 0.75 !important;
+  }
+}
+
+/* Custom sleek scrollbar for Sidebar and history areas */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 3.5px;
+  height: 3.5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Completely hide custom scrollbars on mobile view to rely on native invisible touch swiping */
+@media (max-width: 768px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    display: none;
+  }
+  .custom-scrollbar {
+    scrollbar-width: none;
+  }
+
+  /* Show sleek vertical scrollbar for Chat container on mobile */
+  .chat-mobile-scrollbar.custom-scrollbar::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+    display: block;
+  }
+  .chat-mobile-scrollbar.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .chat-mobile-scrollbar.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(var(--text-primary), 0.25);
+    border-radius: 4px;
+  }
+  .chat-mobile-scrollbar.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--text-primary), 0.4);
+  }
+  .chat-mobile-scrollbar.custom-scrollbar {
+    scrollbar-width: thin;
+  }
+
+  /* Show sleek horizontal scrollbar for specific mobile tab containers */
+  .mobile-tabs-scrollbar.custom-scrollbar::-webkit-scrollbar {
+    height: 4px;
+    display: block;
+  }
+  .mobile-tabs-scrollbar.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(var(--text-secondary), 0.15);
+    border-radius: 4px;
+    margin: 0 16px;
+  }
+  .mobile-tabs-scrollbar.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(var(--text-primary), 0.35);
+    border-radius: 4px;
+  }
+  .mobile-tabs-scrollbar.custom-scrollbar {
+    scrollbar-width: thin;
+    padding-bottom: 6px;
+  }
+}
+
+/* ========================================================================= */
+/* SETTINGS PANEL GLOBAL STYLING SYSTEM */
+/* ========================================================================= */
+
+:root {
+  /* Default variables - matches the basic app layout */
+  --accent-color: 255 255 255;
+  /* white */
+  --accent-bg: rgba(255, 255, 255, 1);
+  --accent-bg-hover: rgba(255, 255, 255, 0.9);
+
+  --bg-primary: 9 9 11;
+  /* zinc-950 */
+  --bg-secondary: 24 24 27;
+  /* zinc-900 */
+  --bg-tertiary: 39 39 42;
+  /* zinc-800 */
+
+  --text-primary: 255 255 255;
+  --text-secondary: 161 161 170;
+  --text-tertiary: 212 212 216;
+  --border-color: 255 255 255;
+  --border-opacity: 0.05;
+}
+
+:root.light {
+  --bg-primary: 255 255 255;
+  --bg-secondary: 249 250 251;
+  --bg-tertiary: 243 244 246;
+
+  --text-primary: 9 9 11;
+  --text-secondary: 82 82 91;
+  --text-tertiary: 113 113 122;
+  --border-color: 0 0 0;
+  --border-opacity: 0.08;
+}
+
+/* Interactive Hover Modules */
+.hover-item {
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.hover-item:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+:root.light .hover-item:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Accent Colors */
+:root[data-accent="default"] {
+  --accent-color: 255 255 255;
+  --accent-bg: rgba(255, 255, 255, 1);
+  --accent-bg-hover: rgba(255, 255, 255, 0.9);
+  --accent-text: 9 9 11;
+}
+
+:root.light[data-accent="default"] {
+  --accent-color: 9 9 11;
+  --accent-bg: rgba(9, 9, 11, 1);
+  --accent-bg-hover: rgba(9, 9, 11, 0.9);
+  --accent-text: 255 255 255;
+}
+
+:root[data-accent="blue"] {
+  --accent-color: 59 130 246;
+  --accent-bg: rgba(59, 130, 246, 1);
+  --accent-bg-hover: rgba(59, 130, 246, 0.9);
+  --accent-text: 255 255 255;
+}
+
+:root[data-accent="green"] {
+  --accent-color: 34 197 94;
+  --accent-bg: rgba(34, 197, 94, 1);
+  --accent-bg-hover: rgba(34, 197, 94, 0.9);
+  --accent-text: 255 255 255;
+}
+
+:root[data-accent="yellow"] {
+  --accent-color: 234 179 8;
+  --accent-bg: rgba(234, 179, 8, 1);
+  --accent-bg-hover: rgba(234, 179, 8, 0.9);
+  --accent-text: 9 9 11;
+}
+
+:root[data-accent="pink"] {
+  --accent-color: 236 72 153;
+  --accent-bg: rgba(236, 72, 153, 1);
+  --accent-bg-hover: rgba(236, 72, 153, 0.9);
+  --accent-text: 255 255 255;
+}
+
+:root[data-accent="orange"] {
+  --accent-color: 249 115 22;
+  --accent-bg: rgba(249, 115, 22, 1);
+  --accent-bg-hover: rgba(249, 115, 22, 0.9);
+  --accent-text: 255 255 255;
+}
+
+/* Design Styles (Dark Mode) */
+:root[data-style="midnight"] {
+  --bg-primary: 3 7 18;
+  --bg-secondary: 15 23 42;
+  --bg-tertiary: 30 41 59;
+  --text-primary: 248 250 252;
+  --text-secondary: 148 163 184;
+  --text-tertiary: 203 213 225;
+  --border-color: 255 255 255;
+  --border-opacity: 0.08;
+}
+
+:root.light[data-style="midnight"] {
+  --bg-primary: 241 245 249;
+  --bg-secondary: 226 232 240;
+  --bg-tertiary: 203 213 225;
+  --text-primary: 2 8 23;
+  --text-secondary: 51 65 85;
+  --text-tertiary: 71 85 105;
+  --border-color: 0 0 0;
+  --border-opacity: 0.08;
+}
+
+:root[data-style="cyberpunk"] {
+  --bg-primary: 15 0 25;
+  --bg-secondary: 35 0 55;
+  --bg-tertiary: 60 5 80;
+  --text-primary: 255 255 255;
+  --text-secondary: 216 180 254;
+  --text-tertiary: 240 171 252;
+  --border-color: 217 70 239;
+  --border-opacity: 0.2;
+}
+
+:root.light[data-style="cyberpunk"] {
+  --bg-primary: 253 244 255;
+  --bg-secondary: 250 232 255;
+  --bg-tertiary: 245 208 254;
+  --text-primary: 74 4 78;
+  --text-secondary: 134 25 143;
+  --text-tertiary: 162 28 175;
+  --border-color: 192 38 211;
+  --border-opacity: 0.2;
+}
+
+:root[data-style="glass"] {
+  --bg-primary: 0 0 0;
+  --bg-secondary: 20 20 20;
+  --bg-tertiary: 40 40 40;
+  --text-primary: 255 255 255;
+  --text-secondary: 161 161 170;
+  --text-tertiary: 212 212 216;
+  --border-color: 255 255 255;
+  --border-opacity: 0.15;
+}
+
+:root.light[data-style="glass"] {
+  --bg-primary: 245 245 245;
+  --bg-secondary: 230 230 230;
+  --bg-tertiary: 215 215 215;
+  --text-primary: 9 9 11;
+  --text-secondary: 82 82 91;
+  --text-tertiary: 113 113 122;
+  --border-color: 0 0 0;
+  --border-opacity: 0.15;
+}
+
+/* Applied Utility Classes */
+.bg-custom-accent {
+  background-color: var(--accent-bg);
+}
+
+.bg-custom-accent:hover {
+  background-color: var(--accent-bg-hover);
+}
+
+.text-custom-accent {
+  color: rgb(var(--accent-color));
+}
+
+.text-custom-accent-inverse {
+  color: rgb(var(--accent-text));
+}
+
+/* Base Theme Utilities */
+@layer utilities {
+  .text-custom-primary {
+    color: rgb(var(--text-primary));
+  }
+
+  .text-custom-secondary {
+    color: rgb(var(--text-secondary));
+  }
+
+  .text-custom-tertiary {
+    color: rgb(var(--text-tertiary));
+  }
+
+  .bg-custom-primary {
+    background-color: rgb(var(--bg-primary));
+  }
+
+  .bg-custom-secondary {
+    background-color: rgb(var(--bg-secondary));
+  }
+
+  .bg-custom-tertiary {
+    background-color: rgb(var(--bg-tertiary));
+  }
+
+  .border-custom {
+    border-color: rgba(var(--border-color), var(--border-opacity));
+  }
+
+  .font-space-grotesk {
+    font-family: 'Space Grotesk', sans-serif !important;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-color) / 0.4);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--border-color) / 0.6);
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button {
+  cursor: pointer;
+}
+
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+  display: none;
+}
+
+/* ==========================================================================
+   AETHER BRANDING ANIMATIONS
+   ========================================================================== */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse-medium {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.5; }
+}
+
+@keyframes pulse-core {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.05); filter: brightness(1.3); }
+}
+
+@keyframes shooting-star {
+  0% { transform: translateX(0) translateY(0) scale(0); opacity: 0; }
+  10% { opacity: 1; transform: scale(1); }
+  90% { opacity: 1; }
+  100% { transform: translateX(600px) translateY(300px) scale(0.5); opacity: 0; }
+}
+
+@keyframes float-orb {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
+  33% { transform: translateY(-30px) translateX(10px); opacity: 0.7; }
+  66% { transform: translateY(15px) translateX(-20px); opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes laser-sweep {
+  0% { transform: translateX(-100%) skewX(-45deg); opacity: 0; }
+  20% { opacity: 0.8; }
+  80% { opacity: 0.8; }
+  100% { transform: translateX(200%) skewX(-45deg); opacity: 0; }
+}
+
+@keyframes chroma-pulse {
+  0%, 100% { transform: translate(0, 0); opacity: 0; }
+  50% { transform: translate(var(--chroma-offset-x), var(--chroma-offset-y)); opacity: 0.6; }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+.laser-flare {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0) 55%,
+    transparent 100%
+  );
+  filter: blur(4px);
+}
+
+.animate-laser {
+  animation: laser-sweep 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-chroma {
+  animation: chroma-pulse 2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 15s linear infinite;
+}
+
+.animate-spin-medium {
+  animation: spin-slow 8s linear infinite;
+}
+
+.animate-spin-reverse-medium {
+  animation: spin-reverse-medium 10s linear infinite;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 4s ease-in-out infinite;
+}
+
+.animate-pulse-core {
+  animation: pulse-core 2s ease-in-out infinite !important;
+}
+
+.animate-shooting-star {
+  animation: shooting-star 4s linear infinite;
+}
+
+@keyframes spectral-orbit {
+  0% { stroke-dashoffset: 100; opacity: 0.3; }
+  50% { stroke-dashoffset: 0; opacity: 0.8; }
+  100% { stroke-dashoffset: -100; opacity: 0.3; }
+}
+
+.animate-spectral-orbit {
+  stroke-dasharray: 50 50;
+  animation: spectral-orbit 4s linear infinite;
+}
+

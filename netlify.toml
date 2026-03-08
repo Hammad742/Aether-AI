@@ -1,0 +1,28 @@
+[[redirects]]
+  from = "/pollinations/*"
+  to = "https://image.pollinations.ai/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/pollinations-p/*"
+  to = "https://pollinations.ai/p/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/hf/*"
+  to = "https://router.huggingface.co/hf-inference/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/ddg/*"
+  to = "https://html.duckduckgo.com/html/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

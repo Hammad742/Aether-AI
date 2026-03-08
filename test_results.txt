@@ -1,0 +1,3 @@
+✅ google/gemma-3-12b-it:free is WORKING
+❌ meta-llama/llama-3.3-70b-instruct:free FAILED: 429
+❌ qwen/qwen3-next-80b-a3b-instruct:free FAILED: 429

@@ -1,0 +1,45 @@
+﻿
+C:\Hammad\Hammad OPENROUTER API\fetch_models.js
+   3:17  error  'process' is not defined                                                                     no-undef
+  17:15  error  'imageModels' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Hammad\Hammad OPENROUTER API\src\App.jsx
+  30:22  error  'e' is defined but never used  no-unused-vars
+  30:25  error  Empty block statement          no-empty
+  39:53  error  'e' is defined but never used  no-unused-vars
+  39:56  error  Empty block statement          no-empty
+  56:22  error  'e' is defined but never used  no-unused-vars
+  56:25  error  Empty block statement          no-empty
+
+C:\Hammad\Hammad OPENROUTER API\src\components\Sidebar.jsx
+  142:34  error  'onOpenSettings' is not defined  no-undef
+
+C:\Hammad\Hammad OPENROUTER API\src\components\markdown\ImageWithFallback.jsx
+  10:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+   8 |     useEffect(() => {
+   9 |         if (props.src !== currentSrc) {
+> 10 |             setCurrentSrc(props.src);
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  11 |             setStatus('loading');
+  12 |         }
+  13 |     }, [props.src, currentSrc]);  react-hooks/set-state-in-effect
+
+C:\Hammad\Hammad OPENROUTER API\test.js
+  1:15  error  'require' is not defined  no-undef
+  5:81  error  'process' is not defined  no-undef
+
+C:\Hammad\Hammad OPENROUTER API\test_image_gen.js
+  1:8  error  'fs' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Hammad\Hammad OPENROUTER API\test_models.js
+  3:17  error  'process' is not defined  no-undef
+
+Γ£û 14 problems (14 errors, 0 warnings)
+
