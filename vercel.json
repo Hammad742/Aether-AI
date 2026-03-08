@@ -1,22 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/pollinations/:path*",
-      "destination": "https://image.pollinations.ai/:path*"
-    },
-    {
-      "source": "/pollinations-p/:path*",
-      "destination": "https://pollinations.ai/p/:path*"
-    },
-    {
-      "source": "/hf/:path*",
-      "destination": "https://router.huggingface.co/hf-inference/:path*"
-    },
-    {
-      "source": "/ddg/:path*",
-      "destination": "https://html.duckduckgo.com/html/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
