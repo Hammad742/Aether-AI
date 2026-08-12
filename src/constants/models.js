@@ -4,11 +4,11 @@
 // All models are free tier options
 export const MODELS = [
     // Confirmed Verified Working (Stable & Fast)
-    { id: 'stepfun/step-3.5-flash:free', label: 'StepFun Step 3.5 Flash', shortLabel: 'Step 3.5 Flash' },
-    { id: 'arcee-ai/trinity-mini:free', label: 'Arcee Trinity Mini', shortLabel: 'Trinity Mini' },
+    { id: 'google/gemma-4-26b-a4b-it:free', label: 'Google Gemma 4 26B', shortLabel: 'Gemma 4 26B' },
+    { id: 'openai/gpt-oss-20b:free', label: 'OpenAI GPT OSS 20B', shortLabel: 'GPT OSS 20B' },
+    { id: 'poolside/laguna-xs-2.1:free', label: 'Poolside Laguna XS', shortLabel: 'Laguna XS' },
     { id: 'nvidia/nemotron-nano-12b-v2-vl:free', label: 'Nemotron Nano 12B 2 VL', shortLabel: 'Nemotron 12B VL' },
-    { id: 'nvidia/nemotron-3-nano-30b-a3b:free', label: 'Nemotron 3 30B', shortLabel: 'Nemotron 30B' },
-    { id: 'black-forest-labs/FLUX.1-schnell', label: 'FLUX.1 Schnell (Hugging Face)', shortLabel: 'FLUX (Image Generation)', type: 'image-hf' },
+    { id: 'flux', label: 'FLUX Image Generation', shortLabel: 'FLUX Image', type: 'image' },
 ]
 
 // Set of model IDs that support vision/image analysis capabilities

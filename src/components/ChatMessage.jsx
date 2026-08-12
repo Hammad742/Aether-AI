@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { FaUser, FaRobot } from 'react-icons/fa';
@@ -53,4 +53,4 @@ const ChatMessage = ({ role, content, model }) => {
     );
 };
 
-export default ChatMessage;
+export default memo(ChatMessage);

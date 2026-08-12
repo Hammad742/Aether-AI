@@ -1,7 +1,7 @@
 // Main form component for user input, model selection, and file/image uploads
 /* eslint-disable no-unused-vars */
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, memo } from 'react'
 import { FaBrain, FaFileAlt, FaTrash, FaPaperPlane, FaRobot, FaTimes, FaGlobe, FaMicrophone,    FaStop,
     FaRedo,
     FaPlus,
@@ -60,8 +60,15 @@ const PromptForm = ({
         if (incoming !== lastPushedPrompt.current) {
             if (textareaRef.current && textareaRef.current.value !== incoming) {
                 textareaRef.current.value = incoming;
-                setHasText(!!incoming.trim());
                 lastPushedPrompt.current = incoming;
+                setTimeout(() => {
+                    setHasText(!!incoming.trim());
+                    // Resize textarea height for external updates
+                    if (textareaRef.current) {
+                        textareaRef.current.style.height = 'auto';
+                        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+                    }
+                }, 0);
             }
         }
     }, [prompt]);
@@ -81,20 +88,28 @@ const PromptForm = ({
             setHasText(currentlyHasText);
         }
 
-        if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        debounceTimer.current = setTimeout(() => {
-            pushPromptUpstream(val);
-        }, 500); 
+        // Auto-grow height calculation (standard performance pattern)
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+        }
     };
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
         const val = textareaRef.current ? textareaRef.current.value : '';
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        pushPromptUpstream(val);
-        setTimeout(() => {
-            onSubmit(e, isWebSearchActive);
-        }, 0);
+        
+        // Reset local textarea and state immediately for instant 0ms clearing
+        if (textareaRef.current) {
+            textareaRef.current.value = '';
+            textareaRef.current.style.height = 'auto'; // Reset height
+        }
+        lastPushedPrompt.current = '';
+        setHasText(false);
+        onPromptChange('');
+        
+        onSubmit(e, isWebSearchActive, val);
     };
 
     // Disable submit button efficiently
@@ -418,4 +433,4 @@ const PromptForm = ({
     )
 }
 
-export default PromptForm;
+export default memo(PromptForm);

@@ -1,6 +1,6 @@
 import { FaPlus, FaRegFolder, FaSearch, FaRegCommentDots, FaCog, FaTrash, FaDownload, FaPen, FaImage } from 'react-icons/fa';
 import { TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse } from 'react-icons/tb';
-import { useState, useRef } from 'react';
+import { useState, useRef, memo } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useSettings } from '../context/SettingsContext';
 
@@ -265,4 +265,4 @@ const Sidebar = ({ isOpen, toggleSidebar, onNewChat, chatHistory = [], onDeleteC
     );
 };
 
-export default Sidebar;
+export default memo(Sidebar);

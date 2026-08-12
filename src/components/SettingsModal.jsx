@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { FaTimes, FaCog, FaDatabase, FaUser, FaCheck, FaChevronLeft, FaPen } from 'react-icons/fa';
 import { useSettings } from '../context/SettingsContext';
 import { useTranslation } from '../hooks/useTranslation';
@@ -712,4 +712,4 @@ const SettingsModal = ({ isOpen, onClose, onDeleteAllChats, onExportAllData }) =
     );
 };
 
-export default SettingsModal;
+export default memo(SettingsModal);

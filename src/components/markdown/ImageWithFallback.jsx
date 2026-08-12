@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { FaImage, FaExclamationTriangle, FaDownload, FaExpand, FaCompress, FaTimes } from 'react-icons/fa';
 
@@ -6,14 +6,15 @@ const ImageWithFallback = (props) => {
     const [status, setStatus] = useState('loading');
     const [currentSrc, setCurrentSrc] = useState(props.src);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [prevSrc, setPrevSrc] = useState(props.src);
     const imgRef = useRef(null);
 
-    useEffect(() => {
-        if (props.src !== currentSrc) {
-            setCurrentSrc(props.src);
-            setStatus('loading');
-        }
-    }, [props.src, currentSrc]);
+    // Adjust state during render if prop changes to avoid effect cascades (linter-approved method)
+    if (props.src !== prevSrc) {
+        setPrevSrc(props.src);
+        setCurrentSrc(props.src);
+        setStatus('loading');
+    }
 
     const handleFullscreen = () => {
         setIsFullscreen(true);
@@ -35,7 +36,26 @@ const ImageWithFallback = (props) => {
     }, []);
 
     const handleLoad = () => setStatus('loaded');
-    const handleError = () => setStatus('error');
+    
+    const handleError = () => {
+        // Fallback 1: If Flux model is rate-limited or offline, retry with high-availability Turbo model
+        if (currentSrc.includes('model=flux')) {
+            console.warn('FLUX image model rate-limited or offline. Falling back to Turbo model...');
+            const fallbackSrc = currentSrc.replace('model=flux', 'model=turbo');
+            setCurrentSrc(fallbackSrc);
+            return;
+        }
+
+        // Fallback 2: If Turbo also fails, retry with Pollinations' default stable model
+        if (currentSrc.includes('model=turbo')) {
+            console.warn('Turbo image model failed. Falling back to default Pollinations model...');
+            const fallbackSrc = currentSrc.replace('model=turbo', 'model=default');
+            setCurrentSrc(fallbackSrc);
+            return;
+        }
+
+        setStatus('error');
+    };
 
     const handleDownload = () => {
         const link = document.createElement('a');
@@ -137,4 +157,4 @@ const ImageWithFallback = (props) => {
     );
 };
 
-export default ImageWithFallback;
+export default memo(ImageWithFallback);

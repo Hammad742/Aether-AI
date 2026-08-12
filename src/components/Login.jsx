@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
-import { FaEnvelope, FaLock, FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
-import AetherLogo from './AetherLogo';
+import { FaEnvelope, FaLock, FaSpinner, FaEye, FaEyeSlash, FaBolt, FaShieldAlt } from 'react-icons/fa';
 
 const Login = ({ onLogin }) => {
     const [loading, setLoading] = useState(false);
@@ -79,256 +78,283 @@ const Login = ({ onLogin }) => {
         }, 1200);
     };
 
+    const hasPassword = !!localStorage.getItem('aetherai_main_password');
+
     return (
-        // Replaced min-h-screen with min-h-[100dvh] to prevent horrific mobile address-bar resize trailing repaints.
         <div
-            className="min-h-[100dvh] flex flex-col sm:flex-row items-center justify-center p-4 sm:p-8 relative overflow-hidden bg-black gap-8 sm:gap-0"
+            className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden bg-[#08080a] transition-all duration-700 select-none"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
+            style={{
+                background: `radial-gradient(circle 800px at ${50 + mousePos.x * 6}% ${50 + mousePos.y * 6}%, rgba(59, 130, 246, 0.02), transparent), #08080a`
+            }}
         >
-            {/* Elegant Branding (Responsive: Flows on mobile, Absolute on Desktop) */}
-            <div className="relative sm:absolute sm:top-8 sm:left-10 z-[10] select-none group mt-4 sm:mt-0">
-                <div className="relative px-6 py-4 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-white/10 group-hover:border-white/20 group-hover:drop-shadow-[0_0_50px_rgba(255,255,255,0.2)] flex items-center gap-4 overflow-hidden">
-                    {/* Branding Logo (Crystalline Prism SVG) */}
-                    <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
-                        {/* Base Logo & Facets */}
-                        <svg className="w-full h-full relative z-10 text-white/70 transition-colors duration-[1000ms] group-hover:text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                            <path d="M12 3V21" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
-                            <path d="M4 7.5L20 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
-                            <path d="M20 7.5L4 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
+            {/* Diagonal Luminous Horizon Arc */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                <svg className="absolute w-full h-full" viewBox="0 0 1440 900" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Atmospheric Ambient Glow behind the line */}
+                    <path 
+                        d="M -100 820 C 350 710, 950 510, 1600 320" 
+                        stroke="url(#glow-gradient)" 
+                        strokeWidth="90" 
+                        strokeLinecap="round" 
+                        opacity="0.14" 
+                        className="blur-[65px]" 
+                    />
+                    <path 
+                        d="M -100 820 C 350 710, 950 510, 1600 320" 
+                        stroke="url(#glow-gradient-inner)" 
+                        strokeWidth="30" 
+                        strokeLinecap="round" 
+                        opacity="0.22" 
+                        className="blur-[16px]" 
+                    />
+                    {/* The sharp horizon line */}
+                    <path 
+                        d="M -100 820 C 350 710, 950 510, 1600 320" 
+                        stroke="url(#line-gradient)" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        opacity="0.5" 
+                        className="blur-[0.5px]" 
+                    />
+                    <defs>
+                        <linearGradient id="glow-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#1e3a8a" />
+                            <stop offset="35%" stopColor="#3b82f6" />
+                            <stop offset="65%" stopColor="#6366f1" />
+                            <stop offset="100%" stopColor="#ffffff" />
+                        </linearGradient>
+                        <linearGradient id="glow-gradient-inner" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#1d4ed8" />
+                            <stop offset="40%" stopColor="#60a5fa" />
+                            <stop offset="70%" stopColor="#818cf8" />
+                            <stop offset="100%" stopColor="#ffffff" />
+                        </linearGradient>
+                        <linearGradient id="line-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.2" />
+                            <stop offset="40%" stopColor="#3b82f6" stopOpacity="0.75" />
+                            <stop offset="70%" stopColor="#ffffff" stopOpacity="0.95" />
+                            <stop offset="100%" stopColor="#818cf8" stopOpacity="0.35" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
 
-                            {/* Spectral Orbit Border Animation (Looped tracing) */}
-                            <path d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" className="animate-spectral-orbit" style={{ opacity: 0.1 }} />
-                        </svg>
-
-                        {/* Logo Chromatic Ghosts */}
-                        <svg className="absolute inset-0 z-0 text-cyan-400/0 group-hover:text-cyan-400/60 transition-all duration-1000 blur-[2px] animate-chroma pointer-events-none select-none" viewBox="0 0 24 24" fill="none" style={{ '--chroma-offset-x': '-3px', '--chroma-offset-y': '1px' }}>
-                            <path d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                            <path d="M12 3V21" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
-                            <path d="M4 7.5L20 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
-                            <path d="M20 7.5L4 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
-                        </svg>
-                        <svg className="absolute inset-0 z-0 text-magenta-500/0 group-hover:text-magenta-500/60 transition-all duration-1000 blur-[2px] animate-chroma pointer-events-none select-none" viewBox="0 0 24 24" fill="none" style={{ '--chroma-offset-x': '3px', '--chroma-offset-y': '-1px', animationDelay: '-1s' }}>
-                            <path d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                            <path d="M12 3V21" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
-                            <path d="M4 7.5L20 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
-                            <path d="M20 7.5L4 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.4" />
-                        </svg>
-                    </div>
-
-                    <div className="relative font-space-grotesk font-bold tracking-[0.3em] text-2xl sm:text-3xl text-white/70 dark:text-custom-primary/80 transition-all duration-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-white cursor-default flex items-center justify-center">
-                        {/* Base Text */}
-                        <span className="relative z-10">AETHER-AI</span>
-
-                        {/* Text Chromatic Ghosts */}
-                        <span className="absolute inset-0 z-0 text-cyan-400/0 group-hover:text-cyan-400/60 transition-all duration-1000 blur-[2px] animate-chroma pointer-events-none select-none" style={{ '--chroma-offset-x': '-3px', '--chroma-offset-y': '1px' }}>
-                            AETHER-AI
-                        </span>
-                        <span className="absolute inset-0 z-0 text-magenta-500/0 group-hover:text-magenta-500/60 transition-all duration-1000 blur-[2px] animate-chroma pointer-events-none select-none" style={{ '--chroma-offset-x': '3px', '--chroma-offset-y': '-1px', animationDelay: '-1s' }}>
-                            AETHER-AI
-                        </span>
-                    </div>
-
-                    {/* Laser Lens Flare Sweep (Scanning Logo + Text) */}
-                    <div className="absolute inset-0 z-20 overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
-                        <div className="absolute inset-0 laser-flare animate-laser" />
-                    </div>
+            {/* Elegant Branding (Top-Left) */}
+            <div className="absolute top-8 left-8 sm:top-10 sm:left-12 z-20 select-none">
+                <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                        <path d="M12 3V21" stroke="currentColor" strokeWidth="1" strokeOpacity="0.15" />
+                        <path d="M4 7.5L20 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.15" />
+                        <path d="M20 7.5L4 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.15" />
+                    </svg>
+                    <span className="font-space-grotesk font-medium tracking-[0.25em] text-sm text-white">
+                        AETHER-AI
+                    </span>
                 </div>
             </div>
 
-            {/* Interactive Parallax Background Layer */}
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-[600ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] scale-[1.10] will-change-transform pointer-events-none z-0"
-                style={{
-                    backgroundImage: `url("${import.meta.env.BASE_URL}249037e8d6daa355b289ea8e8a6db766.jpg")`,
-                    transform: `translate3d(${mousePos.x * 20}px, ${mousePos.y * 20}px, 0) scale(1.10)`
-                }}
-            ></div>
-
-            {/* Subtle overlay to ensure global text contrast without hiding the gorgeous background */}
-            <div className="absolute inset-0 bg-white/5 dark:bg-black/35 transition-colors duration-500 pointer-events-none z-[1]"></div>
-
-            {/* Background Animations: Floating Particles & Shooting Stars */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-                {/* Shooting Stars */}
-                <div className="absolute top-[10%] left-[-50px] w-[2px] h-[2px] bg-white rounded-full shadow-[0_0_10px_white] animate-shooting-star" style={{ animationDelay: '0s' }}></div>
-                <div className="absolute top-[30%] left-[-50px] w-[1.5px] h-[1.5px] bg-white rounded-full shadow-[0_0_8px_white] animate-shooting-star" style={{ animationDelay: '7s' }}></div>
-                <div className="absolute top-[15%] left-[-50px] w-[1px] h-[1px] bg-white rounded-full shadow-[0_0_6px_white] animate-shooting-star" style={{ animationDelay: '14s' }}></div>
-
-                {/* Floating Ethereal Orbs */}
-                <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-500/10 rounded-full blur-[60px] animate-float-orb" style={{ animationDelay: '0s' }}></div>
-                <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-purple-500/10 rounded-full blur-[80px] animate-float-orb" style={{ animationDelay: '4s' }}></div>
-                <div className="absolute top-2/3 left-1/2 w-24 h-24 bg-indigo-500/10 rounded-full blur-[40px] animate-float-orb" style={{ animationDelay: '8s' }}></div>
-            </div>
-
-            {/* Pure Glassmorphism Login Card wrapper  */}
-            {/* The custom text-shadow logic creates perfect readable "halos" in respective modes without ruining the crystal clear card transparency */}
-            <div className="w-full max-w-md bg-white/10 dark:bg-black/20 backdrop-blur-[24px] border border-white/40 dark:border-white/10 rounded-3xl sm:rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 sm:p-8 relative overflow-hidden z-10 transition-colors duration-300 transform-gpu will-change-transform [&_h1]:text-white [&_h1]:drop-shadow-md dark:[&_h1]:text-custom-primary dark:[&_h1]:[text-shadow:_0_2px_12px_rgba(0,0,0,0.9)] dark:[&_h1]:drop-shadow-none [&_p]:text-white/90 [&_p]:drop-shadow-sm dark:[&_p]:text-custom-secondary dark:[&_p]:[text-shadow:_0_2px_8px_rgba(0,0,0,0.9)] dark:[&_p]:drop-shadow-none [&_label]:text-white/90 [&_label]:drop-shadow-sm dark:[&_label]:text-custom-primary dark:[&_label]:[text-shadow:_0_2px_8px_rgba(0,0,0,0.9)] dark:[&_label]:drop-shadow-none" style={{ minHeight: '400px' }}>
-
+            {/* Premium Login Card */}
+            <div 
+                className="w-full max-w-[420px] bg-[#16161a]/60 backdrop-blur-3xl border border-white/[0.06] rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-8 relative z-10 flex flex-col justify-center animate-in fade-in slide-in-from-bottom-4 duration-500 select-text"
+                style={{ minHeight: '440px' }}
+            >
                 {googleAuthStep === 0 ? (
                     <>
-                        {/* Header Section */}
-                        <div className="text-center mb-6 sm:mb-8">
-                            <div className="flex justify-center mb-4 sm:mb-6">
-                                <AetherLogo size="lg" />
+                        {/* Hexagon Logo Header inside Card */}
+                        <div className="flex justify-center mb-6">
+                            <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/[0.02] border border-white/[0.05] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                                <svg className="w-7.5 h-7.5 text-white/90" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                                    <path d="M12 3V21" stroke="currentColor" strokeWidth="1" strokeOpacity="0.15" />
+                                    <path d="M4 7.5L20 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.15" />
+                                    <path d="M20 7.5L4 16.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.15" />
+                                </svg>
                             </div>
-                            <h1 className="text-3xl font-bold tracking-tight text-custom-primary mb-2">
-                                {localStorage.getItem('aetherai_main_password') ? 'Welcome Back' : 'Welcome'}
+                        </div>
+
+                        {/* Title & Description */}
+                        <div className="text-center mb-8">
+                            <h1 className="text-2xl font-normal tracking-tight text-white mb-2">
+                                {hasPassword ? 'Welcome back' : 'Welcome'}
                             </h1>
-                            <p className="text-custom-secondary text-sm">
-                                {localStorage.getItem('aetherai_main_password') ? 'Sign in to continue to your AI Workspace' : 'Create an account to start your AI Workspace'}
+                            <p className="text-xs text-zinc-400 font-normal">
+                                {hasPassword ? 'Sign in to continue to your AI workspace' : 'Create a password to start your AI workspace'}
                             </p>
                         </div>
 
-                        {/* Authentication Form */}
-                        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-
-                            {/* Email Input */}
+                        {/* Form Inputs */}
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Email */}
                             <div className="space-y-1.5">
-                                <label className="text-sm font-medium text-custom-primary pl-1">Email</label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-custom-secondary">
-                                        <FaEnvelope className="w-4 h-4" />
+                                <label className="text-xs font-normal text-zinc-300 pl-0.5">Email address</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500 group-focus-within:text-zinc-300 transition-colors duration-200">
+                                        <FaEnvelope className="w-3.5 h-3.5" />
                                     </div>
                                     <input
                                         type="email"
                                         value={email}
-                                        onInvalid={(e) => e.target.setCustomValidity('Email is Required')}
+                                        onInvalid={(e) => e.target.setCustomValidity('Email is required')}
                                         onInput={(e) => { e.target.setCustomValidity(''); setEmail(e.target.value); }}
                                         required
-                                        className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-custom-tertiary border border-custom focus:border-custom-primary text-custom-primary placeholder-custom-secondary rounded-xl outline-none transition-all duration-200"
+                                        className="w-full pl-10 pr-4 py-2.5 bg-[#141417]/50 border border-white/[0.04] hover:border-white/[0.08] focus:border-zinc-600 focus:ring-1 focus:ring-white/[0.02] text-sm text-white placeholder-zinc-600 rounded-xl outline-none transition-all duration-200"
                                         placeholder="name@example.com"
                                     />
                                 </div>
                             </div>
 
-                            {/* Password Input */}
+                            {/* Password */}
                             <div className="space-y-1.5">
-                                <label className="text-sm font-medium text-custom-primary pl-1">Password</label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-custom-secondary">
-                                        <FaLock className="w-4 h-4" />
+                                <label className="text-xs font-normal text-zinc-300 pl-0.5">Password</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500 group-focus-within:text-zinc-300 transition-colors duration-200">
+                                        <FaLock className="w-3.5 h-3.5" />
                                     </div>
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         value={password}
-                                        onInvalid={(e) => e.target.setCustomValidity('Password is Required')}
+                                        onInvalid={(e) => e.target.setCustomValidity('Password is required')}
                                         onInput={(e) => { e.target.setCustomValidity(''); setPassword(e.target.value); setError(''); }}
                                         required
-                                        className={`w-full pl-10 pr-10 py-2.5 sm:py-3 bg-custom-tertiary border ${error ? 'border-red-500 focus:border-red-500' : 'border-custom focus:border-custom-primary'} text-custom-primary placeholder-custom-secondary rounded-xl outline-none transition-all duration-200`}
+                                        className={`w-full pl-10 pr-10 py-2.5 bg-[#141417]/50 border ${error ? 'border-red-500/70 focus:border-red-500/70 focus:ring-red-500/10' : 'border-white/[0.04] hover:border-white/[0.08] focus:border-zinc-600 focus:ring-1 focus:ring-white/[0.02]'} text-sm text-white placeholder-zinc-600 rounded-xl outline-none transition-all duration-200`}
                                         placeholder="••••••••"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-custom-secondary hover:text-custom-primary transition-colors focus:outline-none"
+                                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none"
                                     >
-                                        {showPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+                                        {showPassword ? <FaEyeSlash className="w-3.5 h-3.5" /> : <FaEye className="w-3.5 h-3.5" />}
                                     </button>
                                 </div>
-                                {error && <p className="text-xs text-red-500 pl-1 mt-1">{error}</p>}
+                                {error && <p className="text-[11px] text-red-400 pl-1 mt-1">{error}</p>}
                             </div>
 
-                            {/* Primary Submit Button */}
+                            {/* Sign In Button */}
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-3 sm:py-3.5 mt-1 sm:mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-secondary))] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                                className="w-full py-2.5 sm:py-3 mt-3 flex items-center justify-between px-5 bg-gradient-to-b from-white to-zinc-200 hover:from-white hover:to-zinc-100 text-zinc-950 rounded-xl font-medium text-sm transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(255,255,255,0.05)] group"
                             >
-                                {loading ? <FaSpinner className="w-5 h-5 animate-spin" /> : "Sign In"}
+                                <span className="flex-1 text-center pl-4">
+                                    {loading ? <FaSpinner className="w-4 h-4 animate-spin mx-auto text-zinc-950" /> : "Sign In"}
+                                </span>
+                                {!loading && <span className="text-zinc-500 font-semibold select-none group-hover:translate-x-0.5 transition-transform duration-200">→</span>}
                             </button>
                         </form>
 
                         {/* Divider */}
-                        <div className="relative my-5 sm:my-7">
+                        <div className="relative my-6">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-custom"></div>
+                                <div className="w-full border-t border-white/[0.04]"></div>
                             </div>
-                            <div className="relative flex justify-center text-xs">
-                                <span className="bg-custom-secondary px-4 text-custom-secondary">Or continue with</span>
+                            <div className="relative flex justify-center text-[10px] tracking-wide text-zinc-500">
+                                <span className="px-3 bg-[#111114]">Or continue with</span>
                             </div>
                         </div>
 
-                        {/* Secondary Google Auth Button */}
+                        {/* Google button */}
                         <button
                             type="button"
                             onClick={handleGoogleSignIn}
                             disabled={loading}
-                            className="w-full flex items-center justify-center gap-3 py-2.5 sm:py-3 px-4 bg-custom-tertiary border border-custom hover:border-custom-primary text-custom-primary rounded-xl font-medium transition-all duration-200 hover:bg-custom-secondary hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                            className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-[#1f1f23]/40 border border-white/[0.05] hover:border-white/[0.1] hover:bg-[#1f1f23]/60 text-zinc-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <FcGoogle className="w-5 h-5" />
+                            <FcGoogle className="w-4 h-4" />
                             Sign in with Google
                         </button>
+
+
                     </>
                 ) : (
                     <>
                         {/* Google Auth Password Step */}
-                        <div className="text-center mb-5 sm:mb-6 relative">
+                        <div className="text-center mb-6 relative">
                             <button
                                 type="button"
                                 onClick={() => setGoogleAuthStep(0)}
-                                className="absolute left-0 top-0 p-2 text-custom-secondary hover:text-custom-primary transition-colors rounded-full hover:bg-custom-tertiary"
+                                className="absolute left-0 top-0 p-1.5 text-zinc-500 hover:text-zinc-300 transition-colors rounded-lg hover:bg-zinc-800/40"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
                             </button>
-                            <FcGoogle className="w-12 h-12 mx-auto mb-4" />
-                            <h1 className="text-2xl font-bold tracking-tight text-custom-primary mb-2">
+                            <FcGoogle className="w-10 h-10 mx-auto mb-3" />
+                            <h1 className="text-xl font-semibold tracking-tight text-white mb-1.5">
                                 Verify it's you
                             </h1>
-                            <p className="text-custom-secondary text-sm">
-                                To continue to your AI Workspace, please confirm your Google password.
+                            <p className="text-xs text-zinc-400 px-4 leading-relaxed">
+                                To continue to your AI workspace, please confirm your Google password.
                             </p>
 
-                            <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-custom bg-custom-tertiary transition-colors">
-                                <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">
-                                    {(email || 'H').charAt(0).toUpperCase()}
+                            <div className="mt-4 inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-white/[0.05] bg-zinc-950/45 text-xs">
+                                <div className="w-4.5 h-4.5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">
+                                    {(email || 'U').charAt(0).toUpperCase()}
                                 </div>
-                                <span className="text-sm font-medium text-custom-primary pr-1">
-                                    {email || 'hammad_k@gmail.com'}
+                                <span className="font-medium text-zinc-300 pr-1">
+                                    {email || 'user@example.com'}
                                 </span>
                             </div>
                         </div>
 
-                        <form onSubmit={handleGooglePasswordSubmit} className="space-y-4 sm:space-y-5">
+                        <form onSubmit={handleGooglePasswordSubmit} className="space-y-4">
+                            {/* Google Password */}
                             <div className="space-y-1.5">
-                                <label className="text-sm font-medium text-custom-primary pl-1">Google Password</label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-custom-secondary">
-                                        <FaLock className="w-4 h-4" />
+                                <label className="text-xs font-normal text-zinc-300 pl-0.5">Google Password</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500 group-focus-within:text-zinc-300 transition-colors duration-200">
+                                        <FaLock className="w-3.5 h-3.5" />
                                     </div>
                                     <input
                                         type={showGooglePassword ? "text" : "password"}
                                         value={googlePassword}
-                                        onInvalid={(e) => e.target.setCustomValidity('Password is Required')}
+                                        onInvalid={(e) => e.target.setCustomValidity('Password is required')}
                                         onInput={(e) => { e.target.setCustomValidity(''); setGooglePassword(e.target.value); setGoogleError(''); }}
                                         required
                                         autoFocus
-                                        className={`w-full pl-10 pr-10 py-2.5 sm:py-3 bg-custom-tertiary border ${googleError ? 'border-red-500 focus:border-red-500' : 'border-custom focus:border-blue-500'} text-custom-primary placeholder-custom-secondary rounded-xl outline-none transition-all duration-200`}
+                                        className={`w-full pl-10 pr-10 py-2.5 bg-zinc-950/45 border ${googleError ? 'border-red-500/70 focus:border-red-500/70 focus:ring-red-500/10' : 'border-white/[0.04] hover:border-white/[0.08] focus:border-zinc-700 focus:ring-1 focus:ring-white/[0.03]'} text-sm text-white placeholder-zinc-600 rounded-xl outline-none transition-all duration-200`}
                                         placeholder="Enter your password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowGooglePassword(!showGooglePassword)}
-                                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-custom-secondary hover:text-custom-primary transition-colors focus:outline-none"
+                                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none"
                                     >
-                                        {showGooglePassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+                                        {showGooglePassword ? <FaEyeSlash className="w-3.5 h-3.5" /> : <FaEye className="w-3.5 h-3.5" />}
                                     </button>
                                 </div>
-                                {googleError && <p className="text-xs text-red-500 pl-1 mt-1">{googleError}</p>}
+                                {googleError && <p className="text-[11px] text-red-400 pl-1 mt-1">{googleError}</p>}
                             </div>
 
                             <button
                                 type="submit"
                                 disabled={loading || !googlePassword.trim()}
-                                className="w-full py-3 sm:py-3.5 mt-1 sm:mt-0 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                                className="w-full py-2.5 sm:py-3 mt-3 flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(59,130,246,0.15)]"
                             >
-                                {loading ? <FaSpinner className="w-5 h-5 animate-spin" /> : "Continue"}
+                                {loading ? <FaSpinner className="w-4 h-4 animate-spin text-white" /> : "Continue"}
                             </button>
                         </form>
                     </>
                 )}
+            </div>
 
+            {/* Footer */}
+            <div className="absolute bottom-6 flex flex-col items-center gap-2 text-[10px] tracking-wide text-zinc-500 font-normal select-none pointer-events-none text-center px-4 w-full">
+                <div className="flex items-center gap-4 text-zinc-400">
+                    <span className="flex items-center gap-1.5">
+                        <FaLock className="w-3 h-3 text-zinc-500" /> Secure
+                    </span>
+                    <span className="text-zinc-800">|</span>
+                    <span className="flex items-center gap-1.5">
+                        <FaBolt className="w-3 h-3 text-zinc-500" /> Fast
+                    </span>
+                    <span className="text-zinc-800">|</span>
+                    <span className="flex items-center gap-1.5">
+                        <FaShieldAlt className="w-3 h-3 text-zinc-500" /> Private
+                    </span>
+                </div>
+                <div className="text-zinc-600">© 2025 Aether-AI. All rights reserved.</div>
             </div>
         </div>
     );

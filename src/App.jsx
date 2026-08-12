@@ -1,10 +1,9 @@
 // Main application component for an AI assistant interface
 // Handles user interactions, API calls to OpenRouter, and state management
 
-import { useMemo, useRef, useState, useEffect } from 'react'
+import { useMemo, useRef, useState, useEffect, lazy, Suspense } from 'react'
 import { fallbackHeaders, MAX_FILE_CHARS } from './constants/api'
 import { MODELS, NOVA_FILE_MODEL_ID, VISION_MODEL_IDS } from './constants/models'
-import ChatMessage from './components/ChatMessage'
 import ErrorBanner from './components/ErrorBanner'
 import Header from './components/Header'
 import PromptForm from './components/PromptForm'
@@ -13,8 +12,11 @@ import Sidebar from './components/Sidebar'
 import { useChat } from './hooks/useChat'
 import { useTranslation } from './hooks/useTranslation'
 import { useSettings } from './context/SettingsContext'
-import SettingsModal from './components/SettingsModal'
-import Login from './components/Login'
+
+// Lazy load heavy components to accelerate initial paint and reduce startup bundle size
+const ChatMessage = lazy(() => import('./components/ChatMessage'))
+const SettingsModal = lazy(() => import('./components/SettingsModal'))
+const Login = lazy(() => import('./components/Login'))
 
 // Helper function to generate an unambiguous, exact timestamp and user context for the system prompt
 const getSystemPrompt = (customInstructions) => {
@@ -68,7 +70,7 @@ function App() {
                 if (exists) return exists
             } catch { /* Ignore syntax error */ }
         }
-        const defaultModel = MODELS.find(m => m.id === 'stepfun/step-3.5-flash:free') || MODELS[0]
+        const defaultModel = MODELS.find(m => m.id === 'google/gemma-4-26b-a4b-it:free') || MODELS[0]
         return defaultModel
     })
 
@@ -126,15 +128,37 @@ function App() {
     const imageInputRef = useRef(null)
     const fileInputRef = useRef(null)
     const messagesEndRef = useRef(null)
+    const chatContainerRef = useRef(null)
 
     // Auto-scroll to bottom when messages change
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    const scrollToBottom = (behavior = "smooth") => {
+        const container = chatContainerRef.current;
+        if (container) {
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior
+            });
+        } else {
+            messagesEndRef.current?.scrollIntoView({ behavior });
+        }
+    }
+
+    const handleAutoScroll = () => {
+        const container = chatContainerRef.current;
+        if (!container) return;
+        const threshold = 150;
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight <= threshold;
+        if (isNearBottom) {
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: 'auto'
+            });
+        }
     }
 
     useEffect(() => {
-        scrollToBottom()
-    }, [messages, prompt]) // Also scroll when typing? Maybe just messages + loading state
+        scrollToBottom("smooth")
+    }, [messages]) // Scroll smoothly only when message count changes, not when typing
 
     // Prepare API headers with authorization and referrer information
     const apiHeaders = useMemo(() => {
@@ -155,9 +179,9 @@ function App() {
     // Use custom hook for chat logic
     const { answer, loading, error: apiError, sendMessage, resetChat, stopGeneration } = useChat(apiHeaders)
 
-    // Scroll when answer streams
+    // Scroll instantly when answer streams but respect manual scrolling up
     useEffect(() => {
-        if (loading) scrollToBottom()
+        if (loading) handleAutoScroll()
     }, [answer, loading])
 
     // Determine model capabilities based on selected model
@@ -230,13 +254,15 @@ function App() {
 
 
     // Main function to handle form submission and API call to OpenRouter
-    const handleSubmit = async (event, isWebSearchActive = false) => {
+    const handleSubmit = async (event, isWebSearchActive = false, overridePrompt = null) => {
         if (event && event.preventDefault) {
             event.preventDefault()
         }
 
+        const activePrompt = overridePrompt !== null ? overridePrompt : prompt;
+
         // Check what content the user has provided
-        const hasText = !!prompt.trim()
+        const hasText = !!activePrompt.trim()
         const hasImage = !!imageData
         const hasFile = !!fileAttachment?.content
 
@@ -263,7 +289,7 @@ function App() {
             if (hasText || fallbackText) {
                 parts.push({
                     type: 'text',
-                    text: hasText ? prompt.trim() : fallbackText
+                    text: hasText ? activePrompt.trim() : fallbackText
                 })
             }
 
@@ -288,7 +314,7 @@ function App() {
             // Construct new user message object
             const displayUserMessage = {
                 role: 'user',
-                content: hasText ? prompt.trim() : (fallbackText || "Sent an attachment")
+                content: hasText ? activePrompt.trim() : (fallbackText || "Sent an attachment")
             }
 
             const newMessages = [...messages, displayUserMessage]
@@ -302,7 +328,7 @@ function App() {
             if (!activeChatId) {
                 activeChatId = Date.now().toString()
                 setCurrentChatId(activeChatId)
-                const title = hasText ? prompt.trim() : (fileAttachment?.name || 'Image attached')
+                const title = hasText ? activePrompt.trim() : (fileAttachment?.name || 'Image attached')
                 setChatHistory(prev => [{ id: activeChatId, title, messages: newMessages }, ...prev])
             } else {
                 setChatHistory(prev => prev.map(chat =>
@@ -323,7 +349,7 @@ function App() {
             const apiMessages = [
                 systemPrompt,
                 ...messages.map(m => ({ role: m.role, content: m.content })), // basic mapping
-                { role: 'user', content: parts.length > 0 ? parts : prompt.trim() } // current valid API message
+                { role: 'user', content: parts.length > 0 ? parts : activePrompt.trim() } // current valid API message
             ]
 
             // Send message using custom hook
@@ -459,24 +485,32 @@ function App() {
         setPrompt(text)
         // Switch to image model if explicitly requested or inferred from text
         if (options.isImage || text.toLowerCase().includes('image')) {
-            handleModelChange('black-forest-labs/FLUX.1-schnell')
+            handleModelChange('flux')
         }
     }
 
     if (!isAuthenticated) {
-        return <Login onLogin={() => setIsAuthenticated(true)} />
+        return (
+            <Suspense fallback={<div className="flex h-[100dvh] items-center justify-center bg-[rgb(var(--bg-primary))] text-custom-primary">Loading...</div>}>
+                <Login onLogin={() => setIsAuthenticated(true)} />
+            </Suspense>
+        )
     }
 
     return (
         // Prevent iOS native scroll bounce and address-bar scaling stutters
         <div className="flex h-[100dvh] bg-[rgb(var(--bg-primary))] text-custom-primary overflow-hidden transition-colors duration-300">
             {/* Settings Modal (Overlay) */}
-            <SettingsModal
-                isOpen={isSettingsOpen}
-                onClose={() => setIsSettingsOpen(false)}
-                onDeleteAllChats={handleDeleteAllChats}
-                onExportAllData={handleExportAllData}
-            />
+            {isSettingsOpen && (
+                <Suspense fallback={null}>
+                    <SettingsModal
+                        isOpen={isSettingsOpen}
+                        onClose={() => setIsSettingsOpen(false)}
+                        onDeleteAllChats={handleDeleteAllChats}
+                        onExportAllData={handleExportAllData}
+                    />
+                </Suspense>
+            )}
 
             {/* Sidebar Component */}
             <Sidebar
@@ -516,24 +550,26 @@ function App() {
                     ) : (
                         /* Active Chat State: Scrollable history + Bottom Input */
                         <>
-                            <div className="flex-1 overflow-y-auto overflow-x-hidden pt-16 sm:pt-20 mb-4 scroll-smooth pr-2 custom-scrollbar chat-mobile-scrollbar w-full max-w-full">
-                                {messages.map((msg, index) => (
-                                    <ChatMessage
-                                        key={index}
-                                        role={msg.role}
-                                        content={msg.content}
-                                        model={msg.role === 'assistant' ? selectedModel : null}
-                                    />
-                                ))}
+                            <div ref={chatContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden pt-16 sm:pt-20 mb-4 scroll-smooth pr-2 custom-scrollbar chat-mobile-scrollbar w-full max-w-full">
+                                <Suspense fallback={<div className="text-center p-4 text-custom-secondary">Loading...</div>}>
+                                    {messages.map((msg, index) => (
+                                        <ChatMessage
+                                            key={index}
+                                            role={msg.role}
+                                            content={msg.content}
+                                            model={msg.role === 'assistant' ? selectedModel : null}
+                                        />
+                                    ))}
 
-                                {/* Streaming Response Bubble */}
-                                {loading && (
-                                    <ChatMessage
-                                        role="assistant"
-                                        content={answer || "Thinking..."}
-                                        model={selectedModel}
-                                    />
-                                )}
+                                    {/* Streaming Response Bubble */}
+                                    {loading && (
+                                        <ChatMessage
+                                            role="assistant"
+                                            content={answer || "Thinking..."}
+                                            model={selectedModel}
+                                        />
+                                    )}
+                                </Suspense>
 
                                 {/* Error Bubble */}
                                 {(validationError || apiError) && (

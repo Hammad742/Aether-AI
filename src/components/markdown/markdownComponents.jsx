@@ -38,7 +38,19 @@ const markdownComponents = {
     h3: asTag('h3', 'text-lg font-semibold text-custom-primary mb-2'),
     h4: asTag('h4', 'text-base font-semibold text-custom-primary mb-2'),
     // Paragraphs
-    p: asTag('p', 'mb-3 text-custom-primary'),
+    p: ({ children }) => {
+        const hasImage = React.Children.toArray(children).some(
+            child => child && (
+                child.type === ImageWithFallback || 
+                child.type === 'img' || 
+                (child.props && child.props.src)
+            )
+        );
+        if (hasImage) {
+            return <div className="mb-3 text-custom-primary">{children}</div>;
+        }
+        return <p className="mb-3 text-custom-primary">{children}</p>;
+    },
     // Lists (unordered and ordered)
     ul: asTag('ul', 'list-disc list-inside space-y-1 mb-3'),
     ol: asTag('ol', 'list-decimal list-inside space-y-1 mb-3'),

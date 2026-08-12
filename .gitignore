@@ -3,15 +3,18 @@ logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Build and dependencies
 node_modules
 dist
 dist-ssr
-*.local
+
+# Local env files
 .env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
@@ -23,3 +26,22 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Scratch logs and scripts
+build_log.txt
+lint.json
+lint.log
+lint_final.txt
+lint_final_utf8.txt
+lint_output.txt
+lint_results.txt
+lint_results_utf8.txt
+test.js
+test_image_gen.js
+test_models.js
+test_pollinations.js
+test_results.txt
+image_models_list.txt
+fetch_models.js
+fetch_image_models.js
+free_models.json

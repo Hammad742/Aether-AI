@@ -36,15 +36,18 @@ export const useChat = (apiHeaders) => {
         abortControllerRef.current = new AbortController();
 
         let retries = 0;
-        const maxRetries = 1;
+        const maxRetries = 3;
 
         while (retries <= maxRetries) {
+            let isTimeout = false;
+            let timeoutId = null;
+
             try {
                 // Check if selected model is an image generation model
                 const selectedModel = MODELS.find(m => m.id === modelId);
 
-                // Handle Hugging Face Image Models
-                if (selectedModel?.type === 'image-hf') {
+                // Handle Image Models
+                if (selectedModel?.type === 'image' || selectedModel?.type === 'image-hf') {
                     try {
                         const lastMessage = messages[messages.length - 1];
                         const promptContent = Array.isArray(lastMessage.content)
@@ -53,57 +56,129 @@ export const useChat = (apiHeaders) => {
 
                         if (!promptContent) throw new Error('No prompt provided for image generation.');
 
+                        setAnswer("Generating image...");
+
+                        // Set a timeout of 35 seconds for image generation
+                        timeoutId = setTimeout(() => {
+                            if (abortControllerRef.current) {
+                                isTimeout = true;
+                                abortControllerRef.current.abort();
+                            }
+                        }, 35000);
+
                         const hfKey = import.meta.env.VITE_HUGGING_FACE_API_KEY;
-                        if (!hfKey) throw new Error('Hugging Face API key is missing. Please add it to your .env file.');
+                        let imageBase64 = null;
 
-                        const response = await fetch(
-                            `${HF_BASE_URL}/models/${modelId}`,
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${hfKey}`,
-                                    "Content-Type": "application/json",
-                                },
-                                method: "POST",
-                                body: JSON.stringify({ inputs: promptContent }),
-                            }
-                        );
+                        // Try Hugging Face first if key is present
+                        if (hfKey) {
+                            try {
+                                console.log('Attempting Hugging Face image generation...');
+                                const hfModel = selectedModel.id === 'flux' ? 'black-forest-labs/FLUX.1-dev' : selectedModel.id;
+                                const hfResponse = await fetch(
+                                    `${HF_BASE_URL}/models/${hfModel}`,
+                                    {
+                                        headers: {
+                                            Authorization: `Bearer ${hfKey}`,
+                                            "Content-Type": "application/json",
+                                        },
+                                        method: "POST",
+                                        body: JSON.stringify({ inputs: promptContent }),
+                                        signal: abortControllerRef.current.signal
+                                    }
+                                );
 
-                        const contentType = response.headers.get("content-type");
-
-                        if (!response.ok || (contentType && !contentType.startsWith('image/'))) {
-                            let errorMessage = 'Failed to generate image from Hugging Face';
-                            if (contentType && contentType.includes("application/json")) {
-                                const errorData = await response.json();
-                                errorMessage = errorData.error || errorMessage;
-                                if (errorData.estimated_time) {
-                                    errorMessage = `Model is loading. Estimated time: ${Math.round(errorData.estimated_time)}s. Please try again soon.`;
+                                if (hfResponse.ok) {
+                                    const contentType = hfResponse.headers.get("content-type");
+                                    if (contentType && contentType.startsWith('image/')) {
+                                        const blob = await hfResponse.blob();
+                                        const reader = new FileReader();
+                                        const base64Promise = new Promise((resolve, reject) => {
+                                            reader.onloadend = () => resolve(reader.result);
+                                            reader.onerror = reject;
+                                        });
+                                        reader.readAsDataURL(blob);
+                                        imageBase64 = await base64Promise;
+                                    }
                                 }
-                            } else if (!response.ok) {
-                                const textError = await response.text();
-                                errorMessage = textError || `HTTP Error ${response.status}`;
-                            } else {
-                                errorMessage = "Hugging Face returned an unexpected response format.";
+                            } catch (hfErr) {
+                                console.warn('Hugging Face image generation failed, falling back to Pollinations:', hfErr);
                             }
-                            throw new Error(errorMessage);
                         }
 
-                        const blob = await response.blob();
-                        const reader = new FileReader();
-                        const base64Promise = new Promise((resolve, reject) => {
-                            reader.onloadend = () => resolve(reader.result);
-                            reader.onerror = reject;
-                        });
-                        reader.readAsDataURL(blob);
-                        const base64Data = await base64Promise;
+                        clearTimeout(timeoutId);
 
-                        const result = `![Generated Image](${base64Data})`;
+                        let result = '';
+
+                        if (imageBase64) {
+                            result = `![Generated Image](${imageBase64})`;
+                        } else {
+                            // Use local Vite dev proxy in development to bypass adblockers/CORS, and direct URL in production
+                            console.log('Generating image link for Pollinations AI...');
+                            const seed = Math.floor(Math.random() * 1000000);
+                            const isDev = import.meta.env.DEV;
+                            const isVercel = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+                            const baseUrl = (isDev || isVercel) ? '/pollinations' : 'https://image.pollinations.ai';
+                            
+                            // Re-init the timeout for the Pollinations fetch request
+                            timeoutId = setTimeout(() => {
+                                if (abortControllerRef.current) {
+                                    isTimeout = true;
+                                    abortControllerRef.current.abort();
+                                }
+                            }, 35000);
+
+                            let activeModelParam = 'flux';
+                            let response = null;
+
+                            // Pre-fetch image from Pollinations AI to ensure it is fully generated before showing it.
+                            // This also implements client-side failovers: flux -> turbo -> default
+                            try {
+                                console.log('Attempting Pollinations image generation with FLUX...');
+                                const imageUrl = `${baseUrl}/prompt/${encodeURIComponent(promptContent)}?model=${activeModelParam}&width=768&height=768&nologo=true&seed=${seed}`;
+                                response = await fetch(imageUrl, { signal: abortControllerRef.current.signal });
+                                if (!response.ok) throw new Error(`Flux failed with status ${response.status}`);
+                            } catch (fluxErr) {
+                                if (abortControllerRef.current?.signal?.aborted) throw fluxErr; // Don't fallback if user cancelled
+                                console.warn('FLUX image model failed, falling back to Turbo:', fluxErr);
+                                activeModelParam = 'turbo';
+                                try {
+                                    const imageUrl = `${baseUrl}/prompt/${encodeURIComponent(promptContent)}?model=${activeModelParam}&width=768&height=768&nologo=true&seed=${seed}`;
+                                    response = await fetch(imageUrl, { signal: abortControllerRef.current.signal });
+                                    if (!response.ok) throw new Error(`Turbo failed with status ${response.status}`);
+                                } catch (turboErr) {
+                                    if (abortControllerRef.current?.signal?.aborted) throw turboErr;
+                                    console.warn('Turbo fallback failed, falling back to default:', turboErr);
+                                    activeModelParam = 'default';
+                                    const imageUrl = `${baseUrl}/prompt/${encodeURIComponent(promptContent)}?model=${activeModelParam}&width=768&height=768&nologo=true&seed=${seed}`;
+                                    response = await fetch(imageUrl, { signal: abortControllerRef.current.signal });
+                                }
+                            }
+
+                            clearTimeout(timeoutId);
+
+                            if (!response || !response.ok) {
+                                throw new Error(`Failed to generate image: ${response ? response.statusText : 'Network error'}`);
+                            }
+
+                            const finalImageUrl = `${baseUrl}/prompt/${encodeURIComponent(promptContent)}?model=${activeModelParam}&width=768&height=768&nologo=true&seed=${seed}`;
+                            result = `![Generated Image](${finalImageUrl})`;
+                        }
+
                         setAnswer(result);
                         setLoading(false);
                         return result;
-                    } catch (hfError) {
-                        setError(hfError.message || 'Hugging Face generation failed.');
+                    } catch (imageError) {
+                        clearTimeout(timeoutId);
+                        if (imageError.name === 'AbortError' && isTimeout && retries < maxRetries) {
+                            console.warn(`Image generation timed out. Retrying... (${retries + 1}/${maxRetries})`);
+                            retries++;
+                            abortControllerRef.current = new AbortController();
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            continue;
+                        }
+                        setError(imageError.message || 'Image generation failed.');
                         setLoading(false);
-                        return; // Do not retry HF errors
+                        return; // Do not retry regular image errors
                     }
                 }
 
@@ -160,7 +235,14 @@ export const useChat = (apiHeaders) => {
                     }
                 }
 
-                // Standard OpenRouter request with streaming
+                // Standard OpenRouter request with streaming and 30s timeout
+                timeoutId = setTimeout(() => {
+                    if (abortControllerRef.current) {
+                        isTimeout = true;
+                        abortControllerRef.current.abort();
+                    }
+                }, 30000);
+
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: apiHeaders,
@@ -172,6 +254,8 @@ export const useChat = (apiHeaders) => {
                     signal: abortControllerRef.current.signal,
                 });
 
+                clearTimeout(timeoutId);
+
                 if (!response.ok) {
                     const errJson = await response.json().catch(() => null);
                     console.error('API Error Details:', errJson);
@@ -181,10 +265,31 @@ export const useChat = (apiHeaders) => {
 
                     let errMsg = openRouterError || providerError || response.statusText || 'Request failed';
 
-                    // Check for transient provider errors to trigger retry (like in reference project)
-                    if (errMsg.toLowerCase().includes('provider returned error') && retries < maxRetries) {
-                        console.warn(`Transient provider error detected. Retrying... (${retries + 1}/${maxRetries})`);
+                    const isTransient = 
+                        response.status === 408 || 
+                        response.status === 429 || 
+                        response.status >= 500 || 
+                        errMsg.toLowerCase().includes('provider returned error') ||
+                        errMsg.toLowerCase().includes('rate limit') ||
+                        errMsg.toLowerCase().includes('rate-limited') ||
+                        errMsg.toLowerCase().includes('overloaded');
+
+                    // Check for transient provider errors to trigger retry
+                    if (isTransient && retries < maxRetries) {
+                        console.warn(`Transient error (${response.status}) detected. Retrying... (${retries + 1}/${maxRetries})`);
                         retries++;
+                        abortControllerRef.current = new AbortController();
+                        await new Promise(resolve => setTimeout(resolve, 2000 * retries)); // Exponential backoff: 2s, 4s, 6s
+                        continue;
+                    }
+
+                    // On final retry failure, try failover to a stable model (GPT OSS 20B)
+                    if (modelId !== 'openai/gpt-oss-20b:free') {
+                        console.warn(`All retries failed for ${modelId}. Failover to openai/gpt-oss-20b:free...`);
+                        modelId = 'openai/gpt-oss-20b:free';
+                        retries = 0;
+                        setAnswer("The selected model is currently offline. Safely falling back to GPT OSS 20B...\n\n");
+                        abortControllerRef.current = new AbortController();
                         await new Promise(resolve => setTimeout(resolve, 1500));
                         continue;
                     }
@@ -205,13 +310,43 @@ export const useChat = (apiHeaders) => {
                 const decoder = new TextDecoder();
 
                 let fullAnswer = '';
+                let buffer = '';
+                let lastUpdateTime = Date.now();
+                const updateThresholdMs = 80; // Update state at most every 80ms to throttle renders
 
                 while (true) {
                     const { done, value } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        // Process any remaining text in the buffer
+                        if (buffer.trim()) {
+                            const lines = buffer.split('\n');
+                            for (const line of lines) {
+                                if (line.trim() === '' || line.trim() === 'data: [DONE]') continue;
+                                if (line.startsWith('data: ')) {
+                                    try {
+                                        const data = JSON.parse(line.slice(6));
+                                        const content = data.choices?.[0]?.delta?.content || '';
+                                        if (content) {
+                                            fullAnswer += content;
+                                        }
+                                    } catch (e) {
+                                        console.warn('Error parsing final stream chunk', e);
+                                    }
+                                }
+                            }
+                        }
+                        // Ensure final answer is committed completely
+                        setAnswer(fullAnswer);
+                        break;
+                    }
 
                     const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
+                    const combined = buffer + chunk;
+                    const lines = combined.split('\n');
+                    
+                    // The last item is either empty or a fragmented JSON string.
+                    // Pop it off and store it in the buffer for the next iteration.
+                    buffer = lines.pop() || '';
 
                     for (const line of lines) {
                         if (line.trim() === '' || line.trim() === 'data: [DONE]') continue;
@@ -222,7 +357,13 @@ export const useChat = (apiHeaders) => {
                                 const content = data.choices?.[0]?.delta?.content || '';
                                 if (content) {
                                     fullAnswer += content;
-                                    setAnswer((prev) => prev + content);
+                                    
+                                    // Throttle UI updates to once per 80ms interval
+                                    const now = Date.now();
+                                    if (now - lastUpdateTime >= updateThresholdMs) {
+                                        setAnswer(fullAnswer);
+                                        lastUpdateTime = now;
+                                    }
                                 }
                             } catch (e) {
                                 console.warn('Error parsing stream chunk', e);
@@ -235,10 +376,38 @@ export const useChat = (apiHeaders) => {
                 return fullAnswer;
 
             } catch (err) {
+                clearTimeout(timeoutId);
                 if (err.name === 'AbortError') {
+                    if (isTimeout && retries < maxRetries) {
+                        console.warn(`Request timed out. Retrying... (${retries + 1}/${maxRetries})`);
+                        retries++;
+                        abortControllerRef.current = new AbortController();
+                        await new Promise(resolve => setTimeout(resolve, 2000 * retries));
+                        continue;
+                    }
+                    if (isTimeout && modelId !== 'openai/gpt-oss-20b:free') {
+                        console.warn(`Request timed out all retries for ${modelId}. Failover to openai/gpt-oss-20b:free...`);
+                        modelId = 'openai/gpt-oss-20b:free';
+                        retries = 0;
+                        setAnswer("The selected model is currently unresponsive. Safely falling back to GPT OSS 20B...\n\n");
+                        abortControllerRef.current = new AbortController();
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        continue;
+                    }
                     setLoading(false);
                     abortControllerRef.current = null;
                     return;
+                }
+
+                // Generic error failover
+                if (modelId !== 'openai/gpt-oss-20b:free') {
+                    console.warn(`Error occurred: ${err.message}. Failover to openai/gpt-oss-20b:free...`);
+                    modelId = 'openai/gpt-oss-20b:free';
+                    retries = 0;
+                    setAnswer("An error occurred with this model. Safely falling back to GPT OSS 20B...\n\n");
+                    abortControllerRef.current = new AbortController();
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    continue;
                 }
 
                 setError(err.message || 'Something went wrong.');

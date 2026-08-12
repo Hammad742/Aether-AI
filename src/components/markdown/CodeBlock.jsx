@@ -1,6 +1,6 @@
 // Custom code block component with syntax highlighting and copy-to-clipboard functionality
 
-import { useState } from "react";
+import { useState, memo } from "react";
 
 const CodeBlock = ({ inline, className, children, ...props }) => {
     // State for copy button feedback
@@ -47,4 +47,4 @@ const CodeBlock = ({ inline, className, children, ...props }) => {
     )
 }
 
-export default CodeBlock;
+export default memo(CodeBlock);

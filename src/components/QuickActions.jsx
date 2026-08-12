@@ -3,6 +3,7 @@
 
 import { FaImage } from 'react-icons/fa'
 import { useTranslation } from '../hooks/useTranslation'
+import { memo } from 'react'
 
 const QuickActions = ({ onSelect }) => {
     const { t } = useTranslation();
@@ -41,4 +42,4 @@ const QuickActions = ({ onSelect }) => {
     );
 }
 
-export default QuickActions;
+export default memo(QuickActions);

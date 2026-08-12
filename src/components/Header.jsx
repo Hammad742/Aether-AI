@@ -1,6 +1,7 @@
 // Header component displaying the app title, logo, and current model selection
 
 import { TbLayoutSidebarLeftExpand } from 'react-icons/tb'
+import { memo } from 'react'
 
 const Header = ({ selectedModel, toggleSidebar }) => (
     <header className="absolute top-0 left-0 right-0 p-4 pb-4 z-50 bg-transparent backdrop-blur-sm">
@@ -29,4 +30,4 @@ const Header = ({ selectedModel, toggleSidebar }) => (
     </header>
 )
 
-export default Header;
+export default memo(Header);
