@@ -4,7 +4,7 @@ A high-performance, responsive, and mobile-optimized web application interface f
 
 ## 🔗 Live Demo
 
-Try the live app here: [aether-ai-murex.vercel.app](https://aether-ai-murex.vercel.app)
+Try the live app here: [hammad-aether-ai-zvis.vercel.app](https://hammad-aether-ai-zvis.vercel.app/)
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19-blue?logo=react) ![Vite](https://img.shields.io/badge/Vite-7-purple?logo=vite) ![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss)
 
